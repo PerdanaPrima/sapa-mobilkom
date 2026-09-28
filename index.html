@@ -497,7 +497,12 @@
               'apikey': SUPABASE_ANON_KEY,
               'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+              p_token: token,
+              p_latitude: lat,
+              p_longitude: lng,
+              p_accuracy: acc
+            })
           });
           if (res.ok) {
             data = await res.json();
@@ -512,7 +517,7 @@
           // fallback
         }
 
-        // 2. Fallback ke endpoint server SAPA
+        // 2. Fallback ke endpoint server SAPA jika ada
         if (!successRpc || !data || data.code === 'PGRST202' || (data.message && data.message.includes('schema cache'))) {
           try {
             const resFallback = await fetch('/api/geotag/submit', {
