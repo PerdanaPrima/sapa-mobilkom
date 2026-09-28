@@ -7,26 +7,23 @@
   <meta name="theme-color" content="#1c3282">
   <link rel="icon" type="image/png" href="img/favicon.png">
   
-  <!-- Fonts: Plus Jakarta Sans -->
+  <!-- SAPA Official Fonts: Funnel Display & Manrope -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --primary: #1c3282;
-      --primary-hover: #152664;
-      --primary-light: #eff6ff;
-      --success: #16a34a;
-      --success-light: #f0fdf4;
-      --danger: #dc2626;
-      --danger-light: #fef2f2;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
+      --brand-navy: #1c3282;
+      --brand-navy-hover: #152664;
+      --brand-blue-light: #eff6ff;
+      --brand-green: #16a34a;
+      --brand-green-light: #f0fdf4;
+      --brand-red: #dc2626;
+      --brand-red-light: #fef2f2;
       --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --radius-card: 24px;
+      --text-secondary: #64748b;
+      --border-light: #e2e8f0;
       --radius-pill: 9999px;
     }
 
@@ -34,47 +31,39 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background-color: #f8fafc;
+      background-color: #ffffff;
       color: var(--text-main);
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 16px;
+      padding: 24px 20px;
     }
 
     .container {
       width: 100%;
-      max-width: 410px;
+      max-width: 380px;
       margin: auto;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius-card);
-      border: 1px solid var(--border);
-      padding: 32px 24px;
-      box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.08);
       text-align: center;
     }
 
     .logo-box {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
     .logo-img {
-      height: 42px;
+      height: 44px;
       width: auto;
-      max-width: 180px;
+      max-width: 190px;
       object-fit: contain;
     }
 
@@ -82,13 +71,13 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--primary-light);
-      color: var(--primary);
+      background: var(--brand-blue-light);
+      color: var(--brand-navy);
       padding: 6px 16px;
       border-radius: var(--radius-pill);
       font-size: 13px;
       font-weight: 700;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       border: 1px solid #bfdbfe;
     }
 
@@ -96,7 +85,7 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--success);
+      background: var(--brand-green);
       box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
       animation: pulse 1.8s infinite;
     }
@@ -108,29 +97,31 @@
     }
 
     .main-title {
-      font-size: 21px;
-      font-weight: 800;
+      font-family: 'Funnel Display', 'Manrope', sans-serif;
+      font-size: 23px;
+      font-weight: 750;
       color: var(--text-main);
       margin-bottom: 8px;
       letter-spacing: -0.2px;
     }
 
     .main-desc {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 24px;
-      padding: 0 6px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      margin-bottom: 28px;
+      padding: 0 4px;
     }
 
     .btn-submit {
       width: 100%;
       height: 52px;
-      background: var(--primary);
+      background: var(--brand-navy);
       color: #ffffff;
       border: none;
       border-radius: var(--radius-pill);
-      font-size: 15px;
+      font-size: 14.5px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -138,13 +129,13 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 6px 16px rgba(28, 50, 130, 0.25);
+      box-shadow: 0 4px 14px rgba(28, 50, 130, 0.22);
     }
 
     .btn-submit:hover {
-      background: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(28, 50, 130, 0.32);
+      background: var(--brand-navy-hover);
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 18px rgba(28, 50, 130, 0.28);
     }
 
     .btn-submit:active {
@@ -162,8 +153,8 @@
       width: 100%;
       height: 46px;
       background: #ffffff;
-      color: var(--primary);
-      border: 1.5px solid var(--primary);
+      color: var(--brand-navy);
+      border: 1.5px solid var(--brand-navy);
       border-radius: var(--radius-pill);
       font-size: 13px;
       font-weight: 700;
@@ -172,11 +163,11 @@
       display: none;
     }
 
-    /* Struk & Status Card */
+    /* Struk & Status Box */
     .status-card {
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 18px;
+      margin-top: 24px;
+      padding: 20px;
+      border-radius: 20px;
       text-align: left;
       display: none;
       font-size: 13px;
@@ -189,13 +180,13 @@
     }
 
     .status-card.success {
-      background: var(--success-light);
+      background: var(--brand-green-light);
       border: 1px solid #bbf7d0;
       color: #14532d;
     }
 
     .status-card.error {
-      background: var(--danger-light);
+      background: var(--brand-red-light);
       border: 1px solid #fecaca;
       color: #7f1d1d;
     }
@@ -235,14 +226,6 @@
       text-align: right;
     }
 
-    .footer {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
     .spinner {
       display: inline-block;
       width: 16px;
@@ -261,78 +244,70 @@
 <body>
 
 <div class="container">
-  <div class="card">
-    
-    <!-- Logo Perusahaan -->
-    <div class="logo-box">
-      <img src="img/sapa_logo.png" alt="SAPA Logo" class="logo-img" onerror="this.onerror=null; this.src='img/mobilkom_logo.png';">
-    </div>
-
-    <!-- Jam Realtime WIB -->
-    <div class="time-badge">
-      <span class="pulse-dot"></span>
-      <span id="liveClock">--:--:-- WIB</span>
-    </div>
-
-    <!-- Judul & Deskripsi Sederhana -->
-    <h1 class="main-title">Presensi Geolocation</h1>
-    <p class="main-desc">
-      Pastikan GPS / Lokasi pada ponsel Anda aktif, lalu tekan tombol di bawah untuk mencatat kehadiran.
-    </p>
-
-    <!-- Tombol Presensi Rounded (Pill) -->
-    <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
-      <span id="btnIcon">📍</span>
-      <span id="btnText">Kirim Presensi Sekarang</span>
-    </button>
-
-    <!-- Tombol Buka di Chrome jika di WebView WA -->
-    <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
-      🌐 Buka di Google Chrome
-    </button>
-
-    <!-- Kotak Hasil & Struk Digital -->
-    <div id="statusBox" class="status-card">
-      <div class="receipt-header">
-        <span id="resIcon" style="font-size: 18px;">✅</span>
-        <span id="resTitle">Presensi Berhasil Dicatat</span>
-      </div>
-
-      <div id="receiptDetails" style="display: none;">
-        <div class="receipt-item">
-          <span class="receipt-label">Nama Karyawan</span>
-          <span class="receipt-val" id="resName">-</span>
-        </div>
-        <div class="receipt-item">
-          <span class="receipt-label">Pangkalan</span>
-          <span class="receipt-val" id="resBase">-</span>
-        </div>
-        <div class="receipt-item">
-          <span class="receipt-label">Waktu</span>
-          <span class="receipt-val" id="resTime">-</span>
-        </div>
-        <div class="receipt-item">
-          <span class="receipt-label">Status</span>
-          <span class="receipt-val" id="resStatus" style="color: #16a34a;">Hadir</span>
-        </div>
-        <div class="receipt-item" id="resGeofenceRow">
-          <span class="receipt-label">Area Kantor</span>
-          <span class="receipt-val" id="resGeofence">✅ Sesuai Radius</span>
-        </div>
-      </div>
-
-      <div id="resMessage" style="margin-top: 10px; font-size: 12px; line-height: 1.4; opacity: 0.9;">
-        Presensi Anda telah tersimpan secara resmi di sistem SAPA.
-      </div>
-    </div>
-
+  
+  <!-- Logo SAPA / Mobilkom -->
+  <div class="logo-box">
+    <img src="img/sapa_logo.png" alt="SAPA Logo" class="logo-img" onerror="this.onerror=null; this.src='img/mobilkom_logo.png';">
   </div>
 
-  <!-- Catatan Ringkas -->
-  <div class="footer">
-    🔒 Layanan Presensi Resmi PT. Mobilkom Telekomindo<br>
-    Tautan aman sekali pakai.
+  <!-- Jam Realtime WIB -->
+  <div class="time-badge">
+    <span class="pulse-dot"></span>
+    <span id="liveClock">--:--:-- WIB</span>
   </div>
+
+  <!-- Judul & Deskripsi Sederhana -->
+  <h1 class="main-title">Presensi Geolocation</h1>
+  <p class="main-desc">
+    Pastikan GPS / Lokasi pada ponsel Anda aktif, lalu tekan tombol di bawah untuk mencatat kehadiran.
+  </p>
+
+  <!-- Tombol Presensi Rounded (Pill) -->
+  <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
+    <span id="btnIcon">📍</span>
+    <span id="btnText">Kirim Presensi Sekarang</span>
+  </button>
+
+  <!-- Tombol Buka di Chrome jika di WebView WA -->
+  <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
+    🌐 Buka di Google Chrome
+  </button>
+
+  <!-- Kotak Hasil & Struk Digital -->
+  <div id="statusBox" class="status-card">
+    <div class="receipt-header">
+      <span id="resIcon" style="font-size: 18px;">✅</span>
+      <span id="resTitle">Presensi Berhasil Dicatat</span>
+    </div>
+
+    <div id="receiptDetails" style="display: none;">
+      <div class="receipt-item">
+        <span class="receipt-label">Nama Karyawan</span>
+        <span class="receipt-val" id="resName">-</span>
+      </div>
+      <div class="receipt-item">
+        <span class="receipt-label">Pangkalan</span>
+        <span class="receipt-val" id="resBase">-</span>
+      </div>
+      <div class="receipt-item">
+        <span class="receipt-label">Waktu</span>
+        <span class="receipt-val" id="resTime">-</span>
+      </div>
+      <div class="receipt-item">
+        <span class="receipt-label">Status</span>
+        <span class="receipt-val" id="resStatus" style="color: #16a34a;">Hadir</span>
+      </div>
+      <div class="receipt-item" id="resGeofenceRow">
+        <span class="receipt-label">Area Kantor</span>
+        <span class="receipt-val" id="resGeofence">✅ Sesuai Radius</span>
+      </div>
+    </div>
+
+    <div id="resMessage" style="margin-top: 10px; font-size: 12px; line-height: 1.4; opacity: 0.9;">
+      Presensi Anda telah tersimpan di sistem SAPA.
+    </div>
+  </div>
+
 </div>
 
 <script>
