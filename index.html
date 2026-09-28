@@ -99,7 +99,7 @@
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
     }
 
-    /* 3. Header & Deskripsi */
+    /* 3. Header Presensi Masuk / Pulang (Dinamis) & Deskripsi */
     .title {
       font-family: 'Funnel Display', 'Manrope', sans-serif;
       font-size: 26px;
@@ -298,8 +298,8 @@
     <span id="liveClock">--:--:-- WIB</span>
   </div>
 
-  <!-- 3. Header & Deskripsi -->
-  <h1 class="title">Presensi Lokasi</h1>
+  <!-- 3. Header Presensi Masuk / Pulang (Otomatis Sesuai Waktu) -->
+  <h1 class="title" id="pageTitle">Presensi Masuk</h1>
   <p class="desc">Pastikan GPS ponsel Anda aktif untuk mencatat kehadiran.</p>
 
   <!-- 4. Langkah 1, 2, 3 (Rounded Pill & Rata Tengah) -->
@@ -375,27 +375,52 @@
 
 <script>
   // =========================================================================
-  // KONFIGURASI SUPABASE (HANYA ANON KEY PUBLIK)
+  // KONFIGURASI SUPABASE & DEVICE IDENTIFIER (ANTI-TITIP ABSEN)
   // =========================================================================
   const SUPABASE_URL = "https://jkwyaqnzgopludvsykma.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_LX0mUofEU0QMP05zip3W9A_3l2yChrp";
 
-  // 1. Jam Realtime WIB
+  // Persistent Device Fingerprint UUID
+  function getOrCreateDeviceId() {
+    let deviceId = localStorage.getItem('sapa_device_fingerprint');
+    if (!deviceId) {
+      deviceId = 'dev_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now();
+      try { localStorage.setItem('sapa_device_fingerprint', deviceId); } catch(e) {}
+    }
+    return deviceId;
+  }
+  const DEVICE_FINGERPRINT = getOrCreateDeviceId();
+
+  // 1. Jam Realtime WIB & Auto-deteksi Judul (Presensi Masuk vs Presensi Pulang)
+  let currentScanType = 'in';
+
   function updateClock() {
     const now = new Date();
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
     const wibDate = new Date(utc + (3600000 * 7));
-    const h = String(wibDate.getHours()).padStart(2, '0');
+    const hours = wibDate.getHours();
+    const h = String(hours).padStart(2, '0');
     const m = String(wibDate.getMinutes()).padStart(2, '0');
     const s = String(wibDate.getSeconds()).padStart(2, '0');
     document.getElementById('liveClock').textContent = `${h}:${m}:${s} WIB`;
+
+    // Penentuan Otomatis Presensi Masuk (< 12:00) atau Presensi Pulang (>= 12:00)
+    const urlParams = new URLSearchParams(window.location.search);
+    const forcedType = urlParams.get('type') || urlParams.get('scan');
+    if (forcedType === 'out' || (!forcedType && hours >= 12)) {
+      currentScanType = 'out';
+      document.getElementById('pageTitle').textContent = 'Presensi Pulang';
+    } else {
+      currentScanType = 'in';
+      document.getElementById('pageTitle').textContent = 'Presensi Masuk';
+    }
   }
   setInterval(updateClock, 1000);
   updateClock();
 
-  // 2. Baca Token dari URL
+  // 2. Baca Token / User Identifier dari URL
   const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('t');
+  const token = urlParams.get('t') || urlParams.get('token') || urlParams.get('u') || urlParams.get('user');
 
   function isWhatsAppWebView() {
     const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -414,7 +439,7 @@
   // 3. Inisialisasi Halaman
   if (!token) {
     document.getElementById('btnAction').disabled = true;
-    showError('Tautan presensi tidak lengkap atau kedaluwarsa. Buka tautan resmi dari WhatsApp SAPA.');
+    showError('Tautan presensi tidak lengkap atau tidak terdaftar. Hubungi admin HRD atau ketik "Absen" di WhatsApp SAPA.');
   }
 
   // 4. Eksekusi Presensi
@@ -453,6 +478,16 @@
         let data = null;
         let successRpc = false;
 
+        const payload = {
+          p_token: token,
+          p_latitude: lat,
+          p_longitude: lng,
+          p_accuracy: acc,
+          p_scan_type: currentScanType,
+          p_device_fingerprint: DEVICE_FINGERPRINT,
+          p_user_agent: navigator.userAgent
+        };
+
         // 1. Coba panggil Supabase RPC
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
@@ -462,12 +497,7 @@
               'apikey': SUPABASE_ANON_KEY,
               'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
             },
-            body: JSON.stringify({
-              p_token: token,
-              p_latitude: lat,
-              p_longitude: lng,
-              p_accuracy: acc
-            })
+            body: JSON.stringify(payload)
           });
           if (res.ok) {
             data = await res.json();
@@ -482,18 +512,13 @@
           // fallback
         }
 
-        // 2. Fallback ke endpoint server SAPA jika dibuka di jaringan internal
+        // 2. Fallback ke endpoint server SAPA
         if (!successRpc || !data || data.code === 'PGRST202' || (data.message && data.message.includes('schema cache'))) {
           try {
             const resFallback = await fetch('/api/geotag/submit', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                p_token: token,
-                p_latitude: lat,
-                p_longitude: lng,
-                p_accuracy: acc
-              })
+              body: JSON.stringify(payload)
             });
             if (resFallback.ok) {
               data = await resFallback.json();
@@ -546,14 +571,15 @@
     box.className = 'status-card success';
     box.style.display = 'block';
 
+    const isEntryIn = (data.scan_type || currentScanType) === 'in';
     document.getElementById('resIcon').textContent = '✓';
-    document.getElementById('resTitle').textContent = data.scan_type === 'in' ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil';
+    document.getElementById('resTitle').textContent = isEntryIn ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil';
     document.getElementById('receiptDetails').style.display = 'block';
 
     document.getElementById('resName').textContent = data.employee_name || '-';
     document.getElementById('resBase').textContent = data.base_name || '-';
     document.getElementById('resTime').textContent = data.time_wib || '-';
-    document.getElementById('resStatus').textContent = data.entry_status ? `${data.entry_status}` : 'Hadir';
+    document.getElementById('resStatus').textContent = data.entry_status ? `${data.entry_status}` : (isEntryIn ? 'Hadir Masuk' : 'Hadir Pulang');
 
     const geoRow = document.getElementById('resGeofenceRow');
     if (data.is_in_geofence) {
