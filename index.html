@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#1c3282">
   <link rel="icon" type="image/png" href="img/favicon.png">
   
-  <!-- SAPA Typography -->
+  <!-- SAPA Official Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -32,48 +32,53 @@
     body {
       background-color: #ffffff;
       color: var(--text-main);
-      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Manrope', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 44px 24px;
+      padding: 56px 24px;
     }
 
     .wrap {
       width: 100%;
-      max-width: 360px;
-      margin: auto;
+      max-width: 350px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
     }
 
     .logo {
-      height: 44px;
+      height: 48px;
       width: auto;
-      max-width: 180px;
+      max-width: 190px;
       object-fit: contain;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
     }
 
+    /* Jam Selaras di Tengah & Tanpa Stroke */
     .time-badge {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       background: #eff6ff;
       color: var(--brand-navy);
-      padding: 6px 16px;
+      padding: 6px 18px;
       border-radius: var(--radius-pill);
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.3px;
-      margin-bottom: 28px;
-      border: 1px solid #dbeafe;
+      margin-bottom: 32px;
+      border: none;
     }
 
     .pulse-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: #16a34a;
       box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
@@ -82,12 +87,12 @@
 
     @keyframes pulse {
       0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+      70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(22, 163, 74, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
     }
 
     .title {
-      font-family: 'Funnel Display', sans-serif;
+      font-family: 'Funnel Display', 'Manrope', sans-serif;
       font-size: 26px;
       font-weight: 700;
       color: var(--text-main);
@@ -99,17 +104,18 @@
       font-size: 13.5px;
       font-weight: 500;
       color: var(--text-secondary);
-      line-height: 1.55;
-      margin-bottom: 32px;
+      line-height: 1.5;
+      margin-bottom: 28px;
     }
 
-    /* Minimal Clean Steps */
+    /* Steps Minimal & Ramping */
     .steps {
+      width: 100%;
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 36px;
+      gap: 8px;
+      margin-bottom: 30px;
       text-align: left;
     }
 
@@ -118,11 +124,12 @@
       align-items: center;
       gap: 14px;
       background: #f8fafc;
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 13.5px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text-main);
+      border: none;
     }
 
     .steps svg {
@@ -130,10 +137,10 @@
       color: var(--brand-navy);
     }
 
-    /* Button */
+    /* Button Utama */
     .btn-submit {
       width: 100%;
-      height: 52px;
+      height: 50px;
       background: var(--brand-navy);
       color: #ffffff;
       border: none;
@@ -184,13 +191,15 @@
 
     /* Struk Digital Hasil */
     .status-card {
-      margin-top: 28px;
-      padding: 20px;
+      width: 100%;
+      margin-top: 24px;
+      padding: 18px;
       border-radius: 16px;
       text-align: left;
       display: none;
       font-size: 13px;
       animation: fadeIn 0.25s ease;
+      border: none;
     }
 
     @keyframes fadeIn {
@@ -200,13 +209,11 @@
 
     .status-card.success {
       background: #f0fdf4;
-      border: 1px solid #bbf7d0;
       color: #14532d;
     }
 
     .status-card.error {
       background: #fef2f2;
-      border: 1px solid #fecaca;
       color: #7f1d1d;
     }
 
@@ -214,7 +221,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       font-family: 'Funnel Display', sans-serif;
       font-weight: 700;
       font-size: 15px;
@@ -247,9 +254,9 @@
 
     .spinner {
       display: inline-block;
-      width: 18px;
-      height: 18px;
-      border: 2.5px solid rgba(255,255,255,0.35);
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.35);
       border-radius: 50%;
       border-top-color: #ffffff;
       animation: spin 0.8s linear infinite;
@@ -264,8 +271,10 @@
 
 <main class="wrap">
   
+  <!-- Logo SAPA di bagian paling atas -->
   <img src="img/sapa_logo.png" alt="SAPA Logo" class="logo" onerror="this.onerror=null; this.src='img/mobilkom_logo.png';">
 
+  <!-- Jam WIB Selaras di Tengah & Tanpa Stroke -->
   <div class="time-badge">
     <span class="pulse-dot"></span>
     <span id="liveClock">--:--:-- WIB</span>
@@ -274,37 +283,41 @@
   <h1 class="title">Presensi Lokasi</h1>
   <p class="desc">Pastikan GPS ponsel Anda aktif untuk mencatat kehadiran.</p>
 
+  <!-- Langkah Ramping & Margin Rapat -->
   <ul class="steps">
     <li>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="8"/>
         <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
       </svg>
       <span>1. Aktifkan GPS / Lokasi</span>
     </li>
     <li>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         <path d="m9 12 2 2 4-4"/>
       </svg>
       <span>2. Izinkan Akses Browser</span>
     </li>
     <li>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M5 12h14M12 5l7 7-7 7"/>
       </svg>
       <span>3. Tekan Kirim Presensi</span>
     </li>
   </ul>
 
+  <!-- Tombol Presensi -->
   <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
     <span id="btnText">Kirim Presensi</span>
   </button>
 
+  <!-- Tombol Buka di Chrome jika di WebView WA -->
   <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
     Buka di Google Chrome
   </button>
 
+  <!-- Kotak Hasil Presensi -->
   <section id="statusBox" class="status-card">
     <div class="receipt-header">
       <span id="resIcon" style="font-size: 16px;">✓</span>
@@ -334,7 +347,7 @@
       </div>
     </div>
 
-    <p id="resMessage" style="margin-top: 12px; font-size: 12px; line-height: 1.45; opacity: 0.9;">
+    <p id="resMessage" style="margin-top: 10px; font-size: 12px; line-height: 1.4; opacity: 0.9;">
       Presensi Anda telah tersimpan di sistem SAPA.
     </p>
   </section>
