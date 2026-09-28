@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uji Gerbang Geolocation - SAPA Mobilkom</title>
+  <style>
+    :root {
+      --primary: #1c3282;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text-main); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .card { background: var(--card-bg); width: 100%; max-width: 440px; border-radius: 20px; border: 1px solid var(--border); padding: 24px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08); text-align: center; }
+    .badge-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: #eff6ff; color: var(--primary); border-radius: 999px; font-size: 11.5px; font-weight: 700; margin-bottom: 12px; }
+    h1 { font-size: 20px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+    p.desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+    .btn-action { width: 100%; height: 50px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-action:active { transform: scale(0.98); }
+    .btn-action:disabled { opacity: 0.65; cursor: not-allowed; }
+    .btn-secondary { width: 100%; height: 44px; background: #fff; color: var(--text-main); border: 1px solid var(--border); border-radius: 12px; font-size: 13.5px; font-weight: 600; cursor: pointer; margin-top: 10px; display: none; }
+    .result-box { margin-top: 20px; padding: 16px; border-radius: 14px; background: #f1f5f9; border: 1px solid var(--border); text-align: left; font-size: 12.5px; display: none; }
+    .result-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #cbd5e1; }
+    .result-item:last-child { border-bottom: none; }
+    .result-label { color: var(--text-muted); font-weight: 500; }
+    .result-val { color: var(--text-main); font-weight: 700; text-align: right; word-break: break-all; }
+    .status-banner { padding: 12px; border-radius: 12px; margin-top: 16px; font-size: 13px; font-weight: 600; display: none; text-align: center; }
+    .status-banner.success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-banner.error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .status-banner.warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="badge-tag">🔬 GATE TEST — SAPA GEOTAG</div>
+  <h1>Uji Coba Geolocation</h1>
+  <p class="desc">
+    Tekan tombol di bawah untuk menguji apakah browser HP Anda mendukung pembacaan GPS presisi tinggi secara langsung dari WhatsApp.
+  </p>
+
+  <button id="btnGeo" class="btn-action" onclick="runGateTest()">
+    <span id="btnText">📍 Ambil Lokasi Saya</span>
+  </button>
+
+  <button id="btnOpenExternal" class="btn-secondary" onclick="openInExternalBrowser()">
+    🌐 Buka di Chrome / Safari Eksternal
+  </button>
+
+  <div id="statusBanner" class="status-banner"></div>
+
+  <div id="resultBox" class="result-box">
+    <div class="result-item"><span class="result-label">Status Izin:</span><span class="result-val" id="resPerm">-</span></div>
+    <div class="result-item"><span class="result-label">Latitude:</span><span class="result-val" id="resLat">-</span></div>
+    <div class="result-item"><span class="result-label">Longitude:</span><span class="result-val" id="resLng">-</span></div>
+    <div class="result-item"><span class="result-label">Akurasi GPS:</span><span class="result-val" id="resAcc">-</span></div>
+    <div class="result-item"><span class="result-label">Waktu Respon:</span><span class="result-val" id="resTime">-</span></div>
+    <div class="result-item"><span class="result-label">In-App WhatsApp:</span><span class="result-val" id="resIsWA">-</span></div>
+    <div class="result-item"><span class="result-label">Browser Client:</span><span class="result-val" id="resUA">-</span></div>
+  </div>
+</div>
+
+<script>
+  let startTime = 0;
+
+  function isWhatsAppWebView() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return (ua.indexOf('WhatsApp') > -1) || (ua.indexOf('WABuild') > -1);
+  }
+
+  function openInExternalBrowser() {
+    const currentUrl = window.location.href;
+    // Trik intent Android / Safari
+    if (/android/i.test(navigator.userAgent)) {
+      window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+    } else {
+      window.location.href = currentUrl;
+    }
+  }
+
+  function runGateTest() {
+    const btn = document.getElementById('btnGeo');
+    const btnText = document.getElementById('btnText');
+    const banner = document.getElementById('statusBanner');
+    const box = document.getElementById('resultBox');
+    const btnExt = document.getElementById('btnOpenExternal');
+
+    if (!navigator.geolocation) {
+      showStatus('error', 'Browser ini tidak mendukung Geolocation API.');
+      return;
+    }
+
+    btn.disabled = true;
+    btnText.textContent = '⏳ Membaca Koordinat GPS...';
+    banner.style.display = 'none';
+    box.style.display = 'none';
+    btnExt.style.display = 'none';
+    startTime = performance.now();
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const duration = Math.round(performance.now() - startTime);
+        btn.disabled = false;
+        btnText.textContent = '🔄 Uji Ulang Lokasi';
+
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const acc = Math.round(pos.coords.accuracy);
+
+        document.getElementById('resPerm').textContent = '✅ DIIZINKAN';
+        document.getElementById('resLat').textContent = lat;
+        document.getElementById('resLng').textContent = lng;
+        document.getElementById('resAcc').textContent = acc + ' meter' + (acc <= 150 ? ' (Sesuai Syarat)' : ' (Terlalu Lebar)');
+        document.getElementById('resTime').textContent = duration + ' ms (' + (duration / 1000).toFixed(1) + ' detik)';
+        document.getElementById('resIsWA').textContent = isWhatsAppWebView() ? 'Ya (In-App WebView)' : 'Tidak (Browser Penuh)';
+        document.getElementById('resUA').textContent = navigator.userAgent.substring(0, 60) + '...';
+
+        box.style.display = 'block';
+
+        if (acc <= 150) {
+          showStatus('success', '🎉 UJI GERBANG LOLOS! Koordinat terbaca cepat dan akurat.');
+        } else {
+          showStatus('warning', '⚠️ Lokasi terbaca tetapi akurasi (' + acc + 'm) melebihi batas 150m. Aktifkan GPS Presisi Tinggi.');
+        }
+      },
+      (err) => {
+        const duration = Math.round(performance.now() - startTime);
+        btn.disabled = false;
+        btnText.textContent = '🔄 Coba Lagi';
+
+        let errMsg = '';
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            errMsg = 'Izin lokasi ditolak oleh pengguna atau sistem browser.';
+            break;
+          case err.POSITION_UNAVAILABLE:
+            errMsg = 'Sinyal GPS tidak tersedia. Pastikan GPS HP sudah diaktifkan.';
+            break;
+          case err.TIMEOUT:
+            errMsg = 'Waktu permintaan habis (Timeout 10 detik). Sinyal GPS lambat.';
+            break;
+          default:
+            errMsg = 'Terjadi kesalahan tidak dikenal: ' + err.message;
+        }
+
+        showStatus('error', '❌ GAGAL: ' + errMsg);
+        document.getElementById('resPerm').textContent = '❌ DITOLAK / GAGAL (' + err.code + ')';
+        document.getElementById('resLat').textContent = '-';
+        document.getElementById('resLng').textContent = '-';
+        document.getElementById('resAcc').textContent = '-';
+        document.getElementById('resTime').textContent = duration + ' ms';
+        document.getElementById('resIsWA').textContent = isWhatsAppWebView() ? 'Ya (In-App)' : 'Tidak';
+        document.getElementById('resUA').textContent = navigator.userAgent.substring(0, 60) + '...';
+        box.style.display = 'block';
+
+        // Tampilkan tombol fallback ke browser eksternal jika di WA
+        if (isWhatsAppWebView() || err.code === err.PERMISSION_DENIED) {
+          btnExt.style.display = 'block';
+        }
+      },
+      options
+    );
+  }
+
+  function showStatus(type, text) {
+    const banner = document.getElementById('statusBanner');
+    banner.className = 'status-banner ' + type;
+    banner.textContent = text;
+    banner.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>

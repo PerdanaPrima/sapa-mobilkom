@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Presensi Geolocation — PT. Mobilkom Telekomindo</title>
+  <meta name="theme-color" content="#1c3282">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1c3282;
+      --primary-hover: #152664;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius-card: 20px;
+      --radius-btn: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; }
+
+    .container { width: 100%; max-width: 420px; margin: auto; }
+    .card { background: var(--card-bg); border-radius: var(--radius-card); border: 1px solid var(--border); padding: 28px 24px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07); text-align: center; }
+
+    .brand-header { margin-bottom: 20px; }
+    .brand-logo-text { font-size: 13px; font-weight: 800; letter-spacing: 1.5px; color: var(--primary); text-transform: uppercase; }
+    .brand-sub { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+
+    .main-title { font-size: 21px; font-weight: 800; color: var(--text-main); margin-bottom: 6px; }
+    .main-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+
+    .time-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--primary-light); color: var(--primary); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; margin-bottom: 24px; border: 1px solid #bfdbfe; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); animation: pulse 1.8s infinite; }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+    }
+
+    .btn-submit { width: 100%; height: 52px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-btn); font-size: 15.5px; font-weight: 700; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 14px rgba(28, 50, 130, 0.25); }
+    .btn-submit:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-submit:active { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-external { width: 100%; height: 46px; background: #ffffff; color: var(--primary); border: 1.5px solid var(--primary); border-radius: var(--radius-btn); font-size: 13.5px; font-weight: 700; cursor: pointer; margin-top: 12px; display: none; }
+
+    .status-card { margin-top: 20px; padding: 18px; border-radius: 16px; text-align: left; display: none; font-size: 13px; }
+    .status-card.success { background: var(--success-light); border: 1px solid #bbf7d0; color: #14532d; }
+    .status-card.error { background: var(--danger-light); border: 1px solid #fecaca; color: #7f1d1d; }
+    .status-card.warning { background: var(--warning-light); border: 1px solid #fde68a; color: #78350f; }
+
+    .receipt-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
+    .receipt-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .receipt-label { font-weight: 600; opacity: 0.75; }
+    .receipt-val { font-weight: 800; text-align: right; }
+
+    .receipt-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-weight: 800; font-size: 15px; }
+
+    .footer { margin-top: 20px; text-align: center; font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <div class="brand-header">
+      <div class="brand-logo-text">PT. Mobilkom Telekomindo</div>
+      <div class="brand-sub">Sistem Absensi Terpadu SAPA • Multi-Pangkalan</div>
+    </div>
+
+    <div class="time-badge">
+      <div class="pulse-dot"></div>
+      <span id="liveClock">00:00:00 WIB</span>
+    </div>
+
+    <h1 class="main-title" id="pageTitle">Presensi Geolocation</h1>
+    <p class="main-desc" id="pageDesc">
+      Pastikan GPS / Lokasi pada ponsel Anda aktif, lalu tekan tombol di bawah untuk mencatat kehadiran.
+    </p>
+
+    <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
+      <span id="btnIcon">📍</span>
+      <span id="btnText">Kirim Presensi Sekarang</span>
+    </button>
+
+    <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
+      🌐 Buka di Chrome / Safari Eksternal
+    </button>
+
+    <!-- KARTU HASIL / TANDA TERIMA -->
+    <div id="statusBox" class="status-card">
+      <div class="receipt-header" id="resHeader">
+        <span id="resIcon">✅</span>
+        <span id="resTitle">Presensi Berhasil Dicatat</span>
+      </div>
+      <div id="receiptDetails">
+        <div class="receipt-item"><span class="receipt-label">Nama:</span><span class="receipt-val" id="resName">-</span></div>
+        <div class="receipt-item"><span class="receipt-label">Pangkalan:</span><span class="receipt-val" id="resBase">-</span></div>
+        <div class="receipt-item"><span class="receipt-label">Waktu:</span><span class="receipt-val" id="resTime">-</span></div>
+        <div class="receipt-item"><span class="receipt-label">Status:</span><span class="receipt-val" id="resStatus">-</span></div>
+        <div class="receipt-item" id="resGeofenceRow"><span class="receipt-label">Area Kantor:</span><span class="receipt-val" id="resGeofence">-</span></div>
+      </div>
+      <div id="resMessage" style="margin-top: 10px; font-size: 12.5px; line-height: 1.4; display: none;"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    🔒 Terproteksi Enkripsi TLS & Database Supabase PostgreSQL.<br>
+    Tautan aman sekali pakai (TTL 15 Menit).
+  </div>
+</div>
+
+<script>
+  // =========================================================================
+  // KONFIGURASI SUPABASE (HANYA ANON KEY PUBLIK)
+  // =========================================================================
+  const SUPABASE_URL = "https://jkwyaqnzgopludvsykma.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_LX0mUofEU0QMP05zip3W9A_3l2yChrp";
+
+  // 1. Live Clock WIB
+  function updateClock() {
+    const now = new Date();
+    // UTC+7 (WIB)
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const wibDate = new Date(utc + (3600000 * 7));
+    const h = String(wibDate.getHours()).padStart(2, '0');
+    const m = String(wibDate.getMinutes()).padStart(2, '0');
+    const s = String(wibDate.getSeconds()).padStart(2, '0');
+    document.getElementById('liveClock').textContent = `${h}:${m}:${s} WIB`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // 2. Baca Token dari URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('t');
+
+  function isWhatsAppWebView() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return (ua.indexOf('WhatsApp') > -1) || (ua.indexOf('WABuild') > -1);
+  }
+
+  function openExternalBrowser() {
+    const currentUrl = window.location.href;
+    if (/android/i.test(navigator.userAgent)) {
+      window.location.href = `intent://${currentUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+    } else {
+      window.location.href = currentUrl;
+    }
+  }
+
+  // 3. Inisialisasi Halaman
+  if (!token) {
+    document.getElementById('btnAction').disabled = true;
+    showError('Tautan presensi tidak lengkap atau token tidak ditemukan. Harap buka tautan resmi yang dikirimkan oleh WhatsApp SAPA.');
+  }
+
+  // 4. Eksekusi Presensi
+  async function submitAttendance() {
+    const btn = document.getElementById('btnAction');
+    const btnText = document.getElementById('btnText');
+    const box = document.getElementById('statusBox');
+    const btnExt = document.getElementById('btnOpenBrowser');
+
+    if (!token) return;
+
+    if (!navigator.geolocation) {
+      showError('Perangkat Anda tidak mendukung fitur Geolocation API.');
+      return;
+    }
+
+    btn.disabled = true;
+    btnText.textContent = 'Membaca Koordinat GPS...';
+    box.style.display = 'none';
+    btnExt.style.display = 'none';
+
+    const geoOptions = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        btnText.textContent = 'Menyimpan ke Sistem...';
+
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const acc = pos.coords.accuracy;
+
+        let data = null;
+        let successRpc = false;
+
+        // 1. Coba panggil Supabase RPC
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              p_token: token,
+              p_latitude: lat,
+              p_longitude: lng,
+              p_accuracy: acc
+            })
+          });
+          if (res.ok) {
+            data = await res.json();
+            if (data && data.success !== undefined) {
+              successRpc = true;
+            }
+          } else {
+            const errJson = await res.json().catch(() => ({}));
+            data = errJson;
+          }
+        } catch (eRpc) {
+          // fallback
+        }
+
+        // 2. Jika Supabase RPC belum dimigrasi di schema cache, panggil endpoint API server SAPA
+        if (!successRpc || !data || data.code === 'PGRST202' || (data.message && data.message.includes('schema cache'))) {
+          try {
+            const resFallback = await fetch('/api/geotag/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                p_token: token,
+                p_latitude: lat,
+                p_longitude: lng,
+                p_accuracy: acc
+              })
+            });
+            if (resFallback.ok) {
+              data = await resFallback.json();
+            }
+          } catch (eFallback) {
+            // ignore
+          }
+        }
+
+        btn.disabled = false;
+        btnText.textContent = 'Kirim Presensi Ulang';
+
+        if (data && data.success) {
+          btn.style.display = 'none'; // Sembunyikan tombol setelah berhasil
+          showSuccess(data);
+        } else {
+          const errMessage = (data && data.message) ? data.message : 'Terjadi kesalahan saat menyimpan presensi.';
+          showError(errMessage);
+        }
+      },
+      (geoErr) => {
+        btn.disabled = false;
+        btnText.textContent = 'Coba Lagi';
+
+        let msg = '';
+        switch(geoErr.code) {
+          case geoErr.PERMISSION_DENIED:
+            msg = 'Izin lokasi ditolak. Silakan berikan izin akses lokasi pada browser Anda.';
+            if (isWhatsAppWebView()) {
+              btnExt.style.display = 'block';
+            }
+            break;
+          case geoErr.POSITION_UNAVAILABLE:
+            msg = 'Sinyal GPS tidak terdeteksi. Pastikan GPS/Lokasi HP sudah diaktifkan.';
+            break;
+          case geoErr.TIMEOUT:
+            msg = 'Waktu permintaan lokasi habis (GPS lambat). Pindahlah ke dekat jendela/luar ruangan dan tekan Coba Lagi.';
+            break;
+          default:
+            msg = 'Kesalahan GPS: ' + geoErr.message;
+        }
+        showError(msg);
+      },
+      geoOptions
+    );
+  }
+
+  function showSuccess(data) {
+    const box = document.getElementById('statusBox');
+    box.className = 'status-card success';
+    box.style.display = 'block';
+
+    document.getElementById('resIcon').textContent = '✅';
+    document.getElementById('resTitle').textContent = data.scan_type === 'in' ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil';
+    document.getElementById('receiptDetails').style.display = 'block';
+
+    document.getElementById('resName').textContent = data.employee_name || '-';
+    document.getElementById('resBase').textContent = data.base_name || '-';
+    document.getElementById('resTime').textContent = data.time_wib || '-';
+    document.getElementById('resStatus').textContent = data.entry_status ? `${data.entry_status}` : 'Hadir';
+
+    const geoRow = document.getElementById('resGeofenceRow');
+    if (data.is_in_geofence) {
+      document.getElementById('resGeofence').textContent = '✅ Sesuai Radius (' + (data.distance_m || 0) + 'm)';
+    } else {
+      document.getElementById('resGeofence').textContent = '📍 Luar Radius (' + (data.distance_m || 0) + 'm)';
+    }
+
+    const msgEl = document.getElementById('resMessage');
+    msgEl.style.display = 'block';
+    msgEl.textContent = data.message || 'Presensi Anda telah tersimpan secara resmi di database SAPA.';
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('statusBox');
+    box.className = 'status-card error';
+    box.style.display = 'block';
+
+    document.getElementById('resIcon').textContent = '❌';
+    document.getElementById('resTitle').textContent = 'Presensi Belum Berhasil';
+    document.getElementById('receiptDetails').style.display = 'none';
+
+    const msgEl = document.getElementById('resMessage');
+    msgEl.style.display = 'block';
+    msgEl.textContent = msg;
+  }
+</script>
+
+</body>
+</html>
