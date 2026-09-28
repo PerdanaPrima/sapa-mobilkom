@@ -38,7 +38,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 72px 24px 96px 24px;
+      padding: 64px 24px 80px 24px;
     }
 
     .wrap {
@@ -51,10 +51,10 @@
       text-align: center;
     }
 
-    /* 1. Logo SAPA Lebih Proporsional & Berjarak */
+    /* 1. Logo SAPA */
     .logo-container {
       padding-top: 8px;
-      margin-bottom: 36px;
+      margin-bottom: 32px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -67,7 +67,16 @@
       object-fit: contain;
     }
 
-    /* 2. Jam WIB Berjarak */
+    /* Kontainer Bagian Form Presensi */
+    #formSection {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* 2. Jam WIB */
     .time-badge {
       display: inline-flex;
       align-items: center;
@@ -80,7 +89,7 @@
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.3px;
-      margin-bottom: 44px;
+      margin-bottom: 40px;
       border: none;
     }
 
@@ -99,7 +108,7 @@
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
     }
 
-    /* 3. Header Presensi Masuk / Pulang (Dinamis) & Deskripsi */
+    /* 3. Header & Deskripsi */
     .title {
       font-family: 'Funnel Display', 'Manrope', sans-serif;
       font-size: 26px;
@@ -114,11 +123,11 @@
       font-weight: 500;
       color: var(--text-secondary);
       line-height: 1.55;
-      margin-bottom: 44px;
+      margin-bottom: 40px;
       max-width: 300px;
     }
 
-    /* 4. Tiga Komponen Langkah: Rounded Pill & Rata Tengah */
+    /* 4. Tiga Komponen Langkah */
     .steps {
       width: 100%;
       max-width: 290px;
@@ -126,7 +135,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      margin: 0 auto 56px auto;
+      margin: 0 auto 50px auto;
     }
 
     .steps li {
@@ -149,7 +158,7 @@
       color: var(--brand-navy);
     }
 
-    /* 5. Tombol Presensi dengan Spacing Ekstra */
+    /* 5. Tombol Presensi */
     .btn-submit {
       width: 100%;
       max-width: 290px;
@@ -204,28 +213,29 @@
       display: none;
     }
 
-    /* Struk Digital Hasil */
+    /* =========================================================================
+       STRUK DIGITAL HASIL PRESENSI (CLEAN POP-UP CARD ONLY)
+       ========================================================================= */
     .status-card {
       width: 100%;
-      max-width: 310px;
-      margin: 32px auto 0 auto;
-      padding: 18px;
-      border-radius: 18px;
-      text-align: left;
+      max-width: 320px;
+      margin: 12px auto 0 auto;
+      padding: 30px 24px 26px 24px;
+      border-radius: 22px;
+      text-align: center;
       display: none;
-      font-size: 13px;
-      animation: fadeIn 0.25s ease;
       border: none;
+      animation: popUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @keyframes popUpFade {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .status-card.success {
-      background: #f0fdf4;
-      color: #14532d;
+      background: #f8fafc;
+      color: var(--text-main);
     }
 
     .status-card.error {
@@ -233,39 +243,73 @@
       color: #7f1d1d;
     }
 
-    .receipt-header {
-      display: flex;
+    /* Icon Sukses Berbentuk Lingkaran Bersih */
+    .receipt-icon-box {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      font-family: 'Funnel Display', sans-serif;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .receipt-icon-box.success {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .receipt-icon-box.error {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .receipt-main-title {
+      font-family: 'Funnel Display', 'Manrope', sans-serif;
+      font-size: 21px;
       font-weight: 700;
-      font-size: 15px;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      padding-bottom: 8px;
+      color: var(--text-main);
+      margin-bottom: 22px;
+      letter-spacing: -0.02em;
+    }
+
+    .receipt-list {
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
     }
 
     .receipt-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 0;
-      border-bottom: 1px dashed rgba(0,0,0,0.08);
-      font-size: 12.5px;
-    }
-
-    .receipt-item:last-child {
-      border-bottom: none;
+      font-size: 13px;
     }
 
     .receipt-label {
-      font-weight: 600;
-      opacity: 0.75;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
 
     .receipt-val {
-      font-weight: 800;
+      font-weight: 700;
+      color: var(--text-main);
       text-align: right;
+    }
+
+    .btn-retry {
+      margin-top: 20px;
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      background: #1c3282;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
     }
 
     .spinner {
@@ -287,63 +331,74 @@
 
 <main class="wrap">
   
-  <!-- 1. Logo SAPA di Paling Atas (Padding & Jarak Lega) -->
+  <!-- 1. Logo SAPA (Selalu Tampil di Atas) -->
   <div class="logo-container">
     <img src="img/sapa_logo.png" alt="SAPA Logo" class="logo" onerror="this.onerror=null; this.src='img/mobilkom_logo.png';">
   </div>
 
-  <!-- 2. Jam WIB -->
-  <div class="time-badge">
-    <span class="pulse-dot"></span>
-    <span id="liveClock">--:--:-- WIB</span>
-  </div>
-
-  <!-- 3. Header Presensi Masuk / Pulang (Otomatis Sesuai Waktu) -->
-  <h1 class="title" id="pageTitle">Presensi Masuk</h1>
-  <p class="desc">Pastikan GPS ponsel Anda aktif untuk mencatat kehadiran.</p>
-
-  <!-- 4. Langkah 1, 2, 3 (Rounded Pill & Rata Tengah) -->
-  <ul class="steps">
-    <li>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="8"/>
-        <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-      </svg>
-      <span>1. Aktifkan GPS / Lokasi</span>
-    </li>
-    <li>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        <path d="m9 12 2 2 4-4"/>
-      </svg>
-      <span>2. Izinkan Akses Browser</span>
-    </li>
-    <li>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 12h14M12 5l7 7-7 7"/>
-      </svg>
-      <span>3. Tekan Kirim Presensi</span>
-    </li>
-  </ul>
-
-  <!-- 5. Tombol Kirim Presensi (Whitespace Luas) -->
-  <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
-    <span id="btnText">Kirim Presensi</span>
-  </button>
-
-  <!-- Tombol Buka di Chrome jika di WebView WA -->
-  <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
-    Buka di Google Chrome
-  </button>
-
-  <!-- Kotak Hasil Presensi -->
-  <section id="statusBox" class="status-card">
-    <div class="receipt-header">
-      <span id="resIcon" style="font-size: 16px;">✓</span>
-      <span id="resTitle">Presensi Berhasil</span>
+  <!-- Kontainer Form Input (Di-hide otomatis ketika presensi sukses) -->
+  <div id="formSection">
+    <!-- 2. Jam WIB -->
+    <div class="time-badge">
+      <span class="pulse-dot"></span>
+      <span id="liveClock">--:--:-- WIB</span>
     </div>
 
-    <div id="receiptDetails" style="display: none;">
+    <!-- 3. Header Presensi Masuk / Pulang -->
+    <h1 class="title" id="pageTitle">Presensi Masuk</h1>
+    <p class="desc">Pastikan GPS ponsel Anda aktif untuk mencatat kehadiran.</p>
+
+    <!-- 4. Langkah 1, 2, 3 -->
+    <ul class="steps">
+      <li>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+        </svg>
+        <span>1. Aktifkan GPS / Lokasi</span>
+      </li>
+      <li>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>2. Izinkan Akses Browser</span>
+      </li>
+      <li>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        <span>3. Tekan Kirim Presensi</span>
+      </li>
+    </ul>
+
+    <!-- 5. Tombol Presensi -->
+    <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
+      <span id="btnText">Kirim Presensi</span>
+    </button>
+
+    <!-- Tombol Buka di Chrome jika di WebView WA -->
+    <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
+      Buka di Google Chrome
+    </button>
+  </div>
+
+  <!-- Kartu Struk Digital Hasil Presensi (Pop-up Tunggal) -->
+  <section id="statusBox" class="status-card">
+    
+    <!-- Ikon SVG Asli Bulat -->
+    <div id="resIconBox" class="receipt-icon-box success">
+      <svg id="resSvgSuccess" width="28" height="28" viewBox="0 0 256 256" fill="currentColor">
+        <path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/>
+      </svg>
+      <svg id="resSvgError" width="28" height="28" viewBox="0 0 256 256" fill="currentColor" style="display: none;">
+        <path d="M165.66,101.66,139.31,128l26.35,26.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35A8,8,0,0,1,165.66,101.66ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"/>
+      </svg>
+    </div>
+
+    <h2 class="receipt-main-title" id="resTitle">Presensi Masuk Berhasil</h2>
+
+    <div id="receiptDetails" class="receipt-list">
       <div class="receipt-item">
         <span class="receipt-label">Nama</span>
         <span class="receipt-val" id="resName">-</span>
@@ -366,9 +421,10 @@
       </div>
     </div>
 
-    <p id="resMessage" style="margin-top: 10px; font-size: 12px; line-height: 1.4; opacity: 0.9;">
-      Presensi Anda telah tersimpan di sistem SAPA.
-    </p>
+    <!-- Error Message Container (Hanya jika error) -->
+    <p id="resErrorMsg" style="display: none; font-size: 13px; line-height: 1.5; color: #991b1b; margin-top: 14px;"></p>
+    <button id="btnRetryError" class="btn-retry" style="display: none;" onclick="resetFormState()">Coba Lagi</button>
+
   </section>
 
 </main>
@@ -380,7 +436,6 @@
   const SUPABASE_URL = "https://jkwyaqnzgopludvsykma.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_LX0mUofEU0QMP05zip3W9A_3l2yChrp";
 
-  // Persistent Device Fingerprint UUID
   function getOrCreateDeviceId() {
     let deviceId = localStorage.getItem('sapa_device_fingerprint');
     if (!deviceId) {
@@ -391,7 +446,7 @@
   }
   const DEVICE_FINGERPRINT = getOrCreateDeviceId();
 
-  // 1. Jam Realtime WIB & Auto-deteksi Judul (Presensi Masuk vs Presensi Pulang)
+  // 1. Jam Realtime WIB & Auto-deteksi Judul
   let currentScanType = 'in';
 
   function updateClock() {
@@ -402,17 +457,19 @@
     const h = String(hours).padStart(2, '0');
     const m = String(wibDate.getMinutes()).padStart(2, '0');
     const s = String(wibDate.getSeconds()).padStart(2, '0');
-    document.getElementById('liveClock').textContent = `${h}:${m}:${s} WIB`;
+    const clockEl = document.getElementById('liveClock');
+    if (clockEl) clockEl.textContent = `${h}:${m}:${s} WIB`;
 
-    // Penentuan Otomatis Presensi Masuk (< 12:00) atau Presensi Pulang (>= 12:00)
     const urlParams = new URLSearchParams(window.location.search);
     const forcedType = urlParams.get('type') || urlParams.get('scan');
     if (forcedType === 'out' || (!forcedType && hours >= 12)) {
       currentScanType = 'out';
-      document.getElementById('pageTitle').textContent = 'Presensi Pulang';
+      const tEl = document.getElementById('pageTitle');
+      if (tEl) tEl.textContent = 'Presensi Pulang';
     } else {
       currentScanType = 'in';
-      document.getElementById('pageTitle').textContent = 'Presensi Masuk';
+      const tEl = document.getElementById('pageTitle');
+      if (tEl) tEl.textContent = 'Presensi Masuk';
     }
   }
   setInterval(updateClock, 1000);
@@ -442,11 +499,19 @@
     showError('Tautan presensi tidak lengkap atau tidak terdaftar. Hubungi admin HRD atau ketik "Absen" di WhatsApp SAPA.');
   }
 
+  function resetFormState() {
+    document.getElementById('formSection').style.display = 'flex';
+    document.getElementById('statusBox').style.display = 'none';
+    const btn = document.getElementById('btnAction');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = false;
+    btnText.textContent = 'Kirim Presensi';
+  }
+
   // 4. Eksekusi Presensi
   async function submitAttendance() {
     const btn = document.getElementById('btnAction');
     const btnText = document.getElementById('btnText');
-    const box = document.getElementById('statusBox');
     const btnExt = document.getElementById('btnOpenBrowser');
 
     if (!token) return;
@@ -458,7 +523,6 @@
 
     btn.disabled = true;
     btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Membaca Lokasi...';
-    box.style.display = 'none';
     btnExt.style.display = 'none';
 
     const geoOptions = {
@@ -517,7 +581,7 @@
           // fallback
         }
 
-        // 2. Fallback ke endpoint server SAPA jika ada
+        // 2. Fallback ke endpoint server SAPA
         if (!successRpc || !data || data.code === 'PGRST202' || (data.message && data.message.includes('schema cache'))) {
           try {
             const resFallback = await fetch('/api/geotag/submit', {
@@ -533,11 +597,7 @@
           }
         }
 
-        btn.disabled = false;
-        btnText.textContent = 'Kirim Presensi Ulang';
-
         if (data && data.success) {
-          btn.style.display = 'none';
           showSuccess(data);
         } else {
           const errMessage = (data && data.message) ? data.message : 'Terjadi kendala saat mencatat presensi.';
@@ -545,9 +605,6 @@
         }
       },
       (geoErr) => {
-        btn.disabled = false;
-        btnText.textContent = 'Coba Lagi';
-
         let msg = '';
         switch(geoErr.code) {
           case geoErr.PERMISSION_DENIED:
@@ -571,15 +628,24 @@
     );
   }
 
+  // TAMPILKAN HANYA KARTU HASIL (FORM SEBELUMNYA DI-HIDE TOTAL)
   function showSuccess(data) {
+    document.getElementById('formSection').style.display = 'none';
+
     const box = document.getElementById('statusBox');
     box.className = 'status-card success';
     box.style.display = 'block';
 
     const isEntryIn = (data.scan_type || currentScanType) === 'in';
-    document.getElementById('resIcon').textContent = '✓';
     document.getElementById('resTitle').textContent = isEntryIn ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil';
-    document.getElementById('receiptDetails').style.display = 'block';
+
+    document.getElementById('resIconBox').className = 'receipt-icon-box success';
+    document.getElementById('resSvgSuccess').style.display = 'block';
+    document.getElementById('resSvgError').style.display = 'none';
+
+    document.getElementById('receiptDetails').style.display = 'flex';
+    document.getElementById('resErrorMsg').style.display = 'none';
+    document.getElementById('btnRetryError').style.display = 'none';
 
     document.getElementById('resName').textContent = data.employee_name || '-';
     document.getElementById('resBase').textContent = data.base_name || '-';
@@ -592,24 +658,27 @@
     } else {
       document.getElementById('resGeofence').textContent = 'Luar Radius (' + (data.distance_m || 0) + 'm)';
     }
-
-    const msgEl = document.getElementById('resMessage');
-    msgEl.style.display = 'block';
-    msgEl.textContent = data.message || 'Presensi Anda telah tersimpan di sistem SAPA.';
   }
 
   function showError(msg) {
+    document.getElementById('formSection').style.display = 'none';
+
     const box = document.getElementById('statusBox');
     box.className = 'status-card error';
     box.style.display = 'block';
 
-    document.getElementById('resIcon').textContent = '✕';
     document.getElementById('resTitle').textContent = 'Presensi Belum Berhasil';
-    document.getElementById('receiptDetails').style.display = 'none';
+    document.getElementById('resIconBox').className = 'receipt-icon-box error';
+    document.getElementById('resSvgSuccess').style.display = 'none';
+    document.getElementById('resSvgError').style.display = 'block';
 
-    const msgEl = document.getElementById('resMessage');
-    msgEl.style.display = 'block';
-    msgEl.textContent = msg;
+    document.getElementById('receiptDetails').style.display = 'none';
+    
+    const errEl = document.getElementById('resErrorMsg');
+    errEl.style.display = 'block';
+    errEl.textContent = msg;
+
+    document.getElementById('btnRetryError').style.display = 'inline-block';
   }
 </script>
 
