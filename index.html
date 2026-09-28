@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#1c3282">
   <link rel="icon" type="image/png" href="img/favicon.png">
   
-  <!-- Fonts: Plus Jakarta Sans & Manrope -->
+  <!-- Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,41 +21,37 @@
       --success-light: #f0fdf4;
       --danger: #dc2626;
       --danger-light: #fef2f2;
-      --warning: #d97706;
-      --warning-light: #fffbeb;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border: #e2e8f0;
       --radius-card: 24px;
-      --radius-btn: 16px;
+      --radius-pill: 9999px;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      background: #f8fafc;
-      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-      background-size: 24px 24px;
+      background-color: #f8fafc;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
+      padding: 20px 16px;
     }
 
     .container {
       width: 100%;
-      max-width: 430px;
+      max-width: 410px;
       margin: auto;
     }
 
@@ -64,42 +60,22 @@
       border-radius: var(--radius-card);
       border: 1px solid var(--border);
       padding: 32px 24px;
-      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.08);
       text-align: center;
-      transition: all 0.3s ease;
     }
 
     .logo-box {
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
     .logo-img {
-      height: 48px;
+      height: 42px;
       width: auto;
-      max-width: 200px;
+      max-width: 180px;
       object-fit: contain;
-    }
-
-    .brand-header {
-      margin-bottom: 20px;
-    }
-
-    .brand-title {
-      font-size: 13.5px;
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      color: var(--primary);
-      text-transform: uppercase;
-      margin-bottom: 3px;
-    }
-
-    .brand-sub {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-muted);
     }
 
     .time-badge {
@@ -108,11 +84,11 @@
       gap: 8px;
       background: var(--primary-light);
       color: var(--primary);
-      padding: 7px 18px;
-      border-radius: 999px;
-      font-size: 13.5px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
       font-weight: 700;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
       border: 1px solid #bfdbfe;
     }
 
@@ -132,43 +108,43 @@
     }
 
     .main-title {
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 800;
       color: var(--text-main);
       margin-bottom: 8px;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.2px;
     }
 
     .main-desc {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.55;
-      margin-bottom: 26px;
-      padding: 0 4px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      padding: 0 6px;
     }
 
     .btn-submit {
       width: 100%;
-      height: 54px;
+      height: 52px;
       background: var(--primary);
       color: #ffffff;
       border: none;
-      border-radius: var(--radius-btn);
-      font-size: 15.5px;
+      border-radius: var(--radius-pill);
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      box-shadow: 0 6px 18px rgba(28, 50, 130, 0.28);
+      gap: 8px;
+      box-shadow: 0 6px 16px rgba(28, 50, 130, 0.25);
     }
 
     .btn-submit:hover {
       background: var(--primary-hover);
       transform: translateY(-2px);
-      box-shadow: 0 8px 22px rgba(28, 50, 130, 0.35);
+      box-shadow: 0 8px 20px rgba(28, 50, 130, 0.32);
     }
 
     .btn-submit:active {
@@ -184,27 +160,22 @@
 
     .btn-external {
       width: 100%;
-      height: 48px;
+      height: 46px;
       background: #ffffff;
       color: var(--primary);
       border: 1.5px solid var(--primary);
-      border-radius: var(--radius-btn);
-      font-size: 13.5px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      margin-top: 14px;
+      margin-top: 12px;
       display: none;
-      transition: background 0.2s;
     }
 
-    .btn-external:hover {
-      background: #f0f7ff;
-    }
-
-    /* Status & Receipt Card */
+    /* Struk & Status Card */
     .status-card {
-      margin-top: 22px;
-      padding: 20px;
+      margin-top: 20px;
+      padding: 18px;
       border-radius: 18px;
       text-align: left;
       display: none;
@@ -213,7 +184,7 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
@@ -232,19 +203,19 @@
     .receipt-header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 12px;
       font-weight: 800;
-      font-size: 15.5px;
+      font-size: 15px;
       border-bottom: 1px solid rgba(0,0,0,0.06);
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
 
     .receipt-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 7px 0;
+      padding: 6px 0;
       border-bottom: 1px dashed rgba(0,0,0,0.08);
       font-size: 12.5px;
     }
@@ -256,7 +227,7 @@
 
     .receipt-label {
       font-weight: 600;
-      opacity: 0.8;
+      opacity: 0.75;
     }
 
     .receipt-val {
@@ -265,7 +236,7 @@
     }
 
     .footer {
-      margin-top: 22px;
+      margin-top: 20px;
       text-align: center;
       font-size: 11.5px;
       color: var(--text-muted);
@@ -274,9 +245,9 @@
 
     .spinner {
       display: inline-block;
-      width: 18px;
-      height: 18px;
-      border: 2.5px solid rgba(255,255,255,0.35);
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.35);
       border-radius: 50%;
       border-top-color: #ffffff;
       animation: spin 0.8s linear infinite;
@@ -297,31 +268,25 @@
       <img src="img/sapa_logo.png" alt="SAPA Logo" class="logo-img" onerror="this.onerror=null; this.src='img/mobilkom_logo.png';">
     </div>
 
-    <!-- Header Instansi -->
-    <div class="brand-header">
-      <div class="brand-title">PT. Mobilkom Telekomindo</div>
-      <div class="brand-sub">Sistem Absensi Terpadu SAPA • Multi-Pangkalan</div>
-    </div>
-
     <!-- Jam Realtime WIB -->
     <div class="time-badge">
       <span class="pulse-dot"></span>
       <span id="liveClock">--:--:-- WIB</span>
     </div>
 
-    <!-- Judul & Instruksi -->
+    <!-- Judul & Deskripsi Sederhana -->
     <h1 class="main-title">Presensi Geolocation</h1>
     <p class="main-desc">
       Pastikan GPS / Lokasi pada ponsel Anda aktif, lalu tekan tombol di bawah untuk mencatat kehadiran.
     </p>
 
-    <!-- Tombol Utama Presensi -->
+    <!-- Tombol Presensi Rounded (Pill) -->
     <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
-      <span id="btnIcon" style="font-size: 18px;">📍</span>
+      <span id="btnIcon">📍</span>
       <span id="btnText">Kirim Presensi Sekarang</span>
     </button>
 
-    <!-- Tombol Buka di Browser Luar (Jika dibuka di WebView WA) -->
+    <!-- Tombol Buka di Chrome jika di WebView WA -->
     <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
       🌐 Buka di Google Chrome
     </button>
@@ -329,7 +294,7 @@
     <!-- Kotak Hasil & Struk Digital -->
     <div id="statusBox" class="status-card">
       <div class="receipt-header">
-        <span id="resIcon" style="font-size: 20px;">✅</span>
+        <span id="resIcon" style="font-size: 18px;">✅</span>
         <span id="resTitle">Presensi Berhasil Dicatat</span>
       </div>
 
@@ -339,15 +304,15 @@
           <span class="receipt-val" id="resName">-</span>
         </div>
         <div class="receipt-item">
-          <span class="receipt-label">Pangkalan / Kantor</span>
+          <span class="receipt-label">Pangkalan</span>
           <span class="receipt-val" id="resBase">-</span>
         </div>
         <div class="receipt-item">
-          <span class="receipt-label">Waktu Presensi</span>
+          <span class="receipt-label">Waktu</span>
           <span class="receipt-val" id="resTime">-</span>
         </div>
         <div class="receipt-item">
-          <span class="receipt-label">Status Kehadiran</span>
+          <span class="receipt-label">Status</span>
           <span class="receipt-val" id="resStatus" style="color: #16a34a;">Hadir</span>
         </div>
         <div class="receipt-item" id="resGeofenceRow">
@@ -356,17 +321,17 @@
         </div>
       </div>
 
-      <div id="resMessage" style="margin-top: 12px; font-size: 12px; line-height: 1.45; opacity: 0.9;">
+      <div id="resMessage" style="margin-top: 10px; font-size: 12px; line-height: 1.4; opacity: 0.9;">
         Presensi Anda telah tersimpan secara resmi di sistem SAPA.
       </div>
     </div>
 
   </div>
 
-  <!-- Catatan Keamanan Ramah Pengguna (Tanpa Bahasa Teknis) -->
+  <!-- Catatan Ringkas -->
   <div class="footer">
-    🔒 <strong>Layanan Presensi Resmi PT. Mobilkom Telekomindo</strong><br>
-    Tautan ini aman dan hanya dapat digunakan satu kali.
+    🔒 Layanan Presensi Resmi PT. Mobilkom Telekomindo<br>
+    Tautan aman sekali pakai.
   </div>
 </div>
 
@@ -377,7 +342,7 @@
   const SUPABASE_URL = "https://jkwyaqnzgopludvsykma.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_LX0mUofEU0QMP05zip3W9A_3l2yChrp";
 
-  // 1. Live Clock WIB
+  // 1. Jam Realtime WIB
   function updateClock() {
     const now = new Date();
     const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -411,7 +376,7 @@
   // 3. Inisialisasi Halaman
   if (!token) {
     document.getElementById('btnAction').disabled = true;
-    showError('Tautan presensi tidak lengkap atau tidak valid. Harap buka tautan resmi yang dikirimkan melalui WhatsApp SAPA.');
+    showError('Tautan presensi tidak lengkap atau tidak valid. Buka tautan resmi dari WhatsApp SAPA.');
   }
 
   // 4. Eksekusi Presensi
@@ -425,7 +390,7 @@
     if (!token) return;
 
     if (!navigator.geolocation) {
-      showError('Ponsel Anda tidak mendukung fitur pendeteksian lokasi GPS.');
+      showError('Ponsel Anda tidak mendukung fitur lokasi GPS.');
       return;
     }
 
@@ -507,10 +472,10 @@
         btnText.textContent = 'Kirim Presensi Ulang';
 
         if (data && data.success) {
-          btn.style.display = 'none'; // Sembunyikan tombol setelah berhasil
+          btn.style.display = 'none';
           showSuccess(data);
         } else {
-          const errMessage = (data && data.message) ? data.message : 'Terjadi kendala saat mencatat presensi. Pastikan koneksi internet aktif.';
+          const errMessage = (data && data.message) ? data.message : 'Terjadi kendala saat mencatat presensi.';
           showError(errMessage);
         }
       },
@@ -528,10 +493,10 @@
             }
             break;
           case geoErr.POSITION_UNAVAILABLE:
-            msg = 'Sinyal GPS belum terdeteksi. Pastikan pengaturan Lokasi di ponsel Anda sudah dinyalakan.';
+            msg = 'Sinyal GPS belum terdeteksi. Pastikan GPS di ponsel Anda sudah dinyalakan.';
             break;
           case geoErr.TIMEOUT:
-            msg = 'Waktu pencarian lokasi habis. Silakan geser ke area terbuka dan tekan Coba Lagi.';
+            msg = 'Waktu pencarian lokasi habis. Silakan coba lagi.';
             break;
           default:
             msg = 'Kendala GPS: ' + geoErr.message;
@@ -558,14 +523,14 @@
 
     const geoRow = document.getElementById('resGeofenceRow');
     if (data.is_in_geofence) {
-      document.getElementById('resGeofence').textContent = '✅ Sesuai Area Kantor (' + (data.distance_m || 0) + 'm)';
+      document.getElementById('resGeofence').textContent = '✅ Sesuai Area (' + (data.distance_m || 0) + 'm)';
     } else {
-      document.getElementById('resGeofence').textContent = '📍 Luar Radius Kantor (' + (data.distance_m || 0) + 'm)';
+      document.getElementById('resGeofence').textContent = '📍 Luar Radius (' + (data.distance_m || 0) + 'm)';
     }
 
     const msgEl = document.getElementById('resMessage');
     msgEl.style.display = 'block';
-    msgEl.textContent = data.message || 'Presensi Anda telah tersimpan secara resmi di sistem SAPA.';
+    msgEl.textContent = data.message || 'Presensi Anda telah tersimpan di sistem SAPA.';
   }
 
   function showError(msg) {
