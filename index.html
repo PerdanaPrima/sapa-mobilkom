@@ -213,6 +213,31 @@
       display: none;
     }
 
+    .btn-back-wa {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 46px;
+      margin-top: 18px;
+      background: #25D366;
+      color: #ffffff;
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: var(--radius-pill);
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .btn-back-wa:hover {
+      background: #20ba59;
+    }
+    .btn-back-wa:active {
+      transform: scale(0.98);
+    }
+
     /* =========================================================================
        STRUK DIGITAL HASIL PRESENSI (CLEAN POP-UP CARD ONLY)
        ========================================================================= */
@@ -420,6 +445,14 @@
         <span class="receipt-val" id="resGeofence">Sesuai Radius</span>
       </div>
     </div>
+
+    <!-- Tombol Kembali ke WhatsApp SAPA -->
+    <a id="btnBackWa" href="#" class="btn-back-wa" style="display: none;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/>
+      </svg>
+      <span>Kembali ke WhatsApp SAPA</span>
+    </a>
 
     <!-- Error Message Container (Hanya jika error) -->
     <p id="resErrorMsg" style="display: none; font-size: 13px; line-height: 1.5; color: #991b1b; margin-top: 14px;"></p>
@@ -650,13 +683,33 @@
     document.getElementById('resName').textContent = data.employee_name || '-';
     document.getElementById('resBase').textContent = data.base_name || '-';
     document.getElementById('resTime').textContent = data.time_wib || '-';
-    document.getElementById('resStatus').textContent = data.entry_status ? `${data.entry_status}` : (isEntryIn ? 'Hadir Masuk' : 'Hadir Pulang');
+
+    let statusText = data.entry_status;
+    if (!isEntryIn) {
+      if (!statusText || statusText === 'Terlambat') {
+        statusText = 'Tepat Waktu';
+      }
+    } else {
+      if (!statusText) {
+        statusText = 'Tepat Waktu';
+      }
+    }
+    document.getElementById('resStatus').textContent = statusText;
 
     const geoRow = document.getElementById('resGeofenceRow');
     if (data.is_in_geofence) {
       document.getElementById('resGeofence').textContent = 'Sesuai Area (' + (data.distance_m || 0) + 'm)';
     } else {
       document.getElementById('resGeofence').textContent = 'Luar Radius (' + (data.distance_m || 0) + 'm)';
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const botPhone = urlParams.get('bot') || '6282283432739';
+    const btnWa = document.getElementById('btnBackWa');
+    if (btnWa) {
+      const waText = encodeURIComponent("Sudah tautkan titik lokasi");
+      btnWa.href = `https://wa.me/${botPhone}?text=${waText}`;
+      btnWa.style.display = 'inline-flex';
     }
   }
 
