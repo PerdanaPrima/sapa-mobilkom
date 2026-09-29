@@ -446,22 +446,14 @@
       </div>
     </div>
 
-    <!-- Tombol Kembali ke WhatsApp SAPA -->
-    <a id="btnBackWa" href="#" class="btn-back-wa" style="display: none;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/>
-      </svg>
-      <span>Buka WhatsApp SAPA</span>
-    </a>
-
-    <!-- Opsi Alternatif Salin / Multi-WA -->
-    <div id="waAltOption" style="display: none; margin-top: 14px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; text-align: center;">
-      <div style="font-size: 11.5px; color: #64748b; margin-bottom: 6px;">Atau jika menggunakan WA Web / Multi-Akun:</div>
-      <button id="btnCopyCode" onclick="copyWaText()" type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 38px; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; border-radius: 999px; cursor: pointer; transition: all 0.15s ease;">
+    <!-- Box Aksi Balas WhatsApp (Singkat & Padat) -->
+    <div id="waActionBox" style="display: none; margin-top: 16px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center;">
+      <div style="font-size: 11.5px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Balas:</div>
+      <button id="btnCopyCode" onclick="copyWaText()" type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 38px; background: #f8fafc; border: 1.5px solid #0f172a; color: #0f172a; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13.5px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
         <span id="copyIcon">📋</span>
-        <span id="copyText">Salin Teks Konfirmasi</span>
+        <span id="copyText">Sudah</span>
       </button>
-      <div style="font-size: 11.5px; color: #64748b; margin-top: 6px;">Kirim teks salinan atau cukup balas <strong style="color: #0f172a;">"Sudah"</strong> / <strong style="color: #0f172a;">"Siap"</strong> di chat SAPA 😊</div>
+      <div style="font-size: 11px; color: #64748b; margin-top: 6px;">Kirim ke WA</div>
     </div>
 
     <!-- Error Message Container (Hanya jika error) -->
@@ -713,23 +705,14 @@
       document.getElementById('resGeofence').textContent = 'Luar Radius (' + (data.distance_m || 0) + 'm)';
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const botPhone = urlParams.get('bot') || '6282283432739';
-    const btnWa = document.getElementById('btnBackWa');
-    if (btnWa) {
-      const waText = encodeURIComponent("Sudah tautkan titik lokasi");
-      btnWa.href = `https://wa.me/${botPhone}?text=${waText}`;
-      btnWa.style.display = 'inline-flex';
-    }
-
-    const altOption = document.getElementById('waAltOption');
-    if (altOption) {
-      altOption.style.display = 'block';
+    const actionBox = document.getElementById('waActionBox');
+    if (actionBox) {
+      actionBox.style.display = 'block';
     }
   }
 
   function copyWaText() {
-    const textToCopy = "Sudah tautkan titik lokasi";
+    const textToCopy = "Sudah";
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(textToCopy).then(() => {
         showCopied();
@@ -754,7 +737,7 @@
       document.execCommand('copy');
       showCopied();
     } catch (err) {
-      alert('Gagal menyalin otomatis. Silakan ketik "Sudah" di chat WhatsApp SAPA.');
+      alert('Gagal menyalin. Silakan ketik "Sudah" di chat WhatsApp.');
     }
     document.body.removeChild(textArea);
   }
@@ -767,17 +750,17 @@
       const origIcon = icon.textContent;
       const origText = text.textContent;
       icon.textContent = '✅';
-      text.textContent = 'Tersalin! Silakan kirim ke WA SAPA';
+      text.textContent = 'Tersalin!';
       btn.style.borderColor = '#16a34a';
       btn.style.color = '#16a34a';
       btn.style.background = '#f0fdf4';
       setTimeout(() => {
         icon.textContent = origIcon;
         text.textContent = origText;
-        btn.style.borderColor = '#cbd5e1';
-        btn.style.color = '#1e293b';
+        btn.style.borderColor = '#0f172a';
+        btn.style.color = '#0f172a';
         btn.style.background = '#f8fafc';
-      }, 3000);
+      }, 2500);
     }
   }
 
@@ -795,9 +778,9 @@
 
     document.getElementById('receiptDetails').style.display = 'none';
     
-    const altOption = document.getElementById('waAltOption');
-    if (altOption) {
-      altOption.style.display = 'none';
+    const actionBox = document.getElementById('waActionBox');
+    if (actionBox) {
+      actionBox.style.display = 'none';
     }
 
     const errEl = document.getElementById('resErrorMsg');
