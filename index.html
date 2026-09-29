@@ -421,7 +421,7 @@
       </svg>
     </div>
 
-    <h2 class="receipt-main-title" id="resTitle">Presensi Masuk Berhasil</h2>
+    <h2 class="receipt-main-title" id="resTitle">Konfirmasi di WhatsApp</h2>
 
     <div id="receiptDetails" class="receipt-list">
       <div class="receipt-item">
@@ -449,11 +449,12 @@
     <!-- Box Aksi Balas WhatsApp (Singkat & Padat) -->
     <div id="waActionBox" style="display: none; margin-top: 16px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center;">
       <div style="font-size: 11.5px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Balas:</div>
-      <button id="btnCopyCode" onclick="copyWaText()" type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 38px; background: #f8fafc; border: 1.5px solid #0f172a; color: #0f172a; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13.5px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
-        <span id="copyIcon">📋</span>
+      <button id="btnCopyCode" onclick="copyWaText()" type="button" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 38px; background: #f8fafc; border: 1.5px solid #0f172a; color: #0f172a; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13.5px; border-radius: 9999px; cursor: pointer; transition: all 0.15s ease;">
         <span id="copyText">Sudah</span>
       </button>
-      <div style="font-size: 11px; color: #64748b; margin-top: 6px;">Kirim ke WA</div>
+      <div style="margin-top: 6px;">
+        <a id="waDirectLink" href="https://wa.me/6282283432739?text=Sudah" target="_blank" style="font-size: 11px; color: #64748b; text-decoration: none; cursor: pointer; transition: color 0.15s ease;">Kirim ke WA</a>
+      </div>
     </div>
 
     <!-- Error Message Container (Hanya jika error) -->
@@ -672,7 +673,7 @@
     box.style.display = 'block';
 
     const isEntryIn = (data.scan_type || currentScanType) === 'in';
-    document.getElementById('resTitle').textContent = isEntryIn ? 'Presensi Masuk Berhasil' : 'Presensi Pulang Berhasil';
+    document.getElementById('resTitle').textContent = 'Konfirmasi di WhatsApp';
 
     document.getElementById('resIconBox').className = 'receipt-icon-box success';
     document.getElementById('resSvgSuccess').style.display = 'block';
@@ -703,6 +704,20 @@
       document.getElementById('resGeofence').textContent = 'Sesuai Area (' + (data.distance_m || 0) + 'm)';
     } else {
       document.getElementById('resGeofence').textContent = 'Luar Radius (' + (data.distance_m || 0) + 'm)';
+    }
+
+    // Update Tautan Balas ke Nomor Bot WhatsApp SAPA
+    let botParam = urlParams.get('bot') || urlParams.get('phone') || '';
+    if (data && (data.whatsapp_bot_phone || data.bot_phone)) {
+      botParam = data.whatsapp_bot_phone || data.bot_phone;
+    }
+    let cleanBotPhone = String(botParam || '').replace(/[^\d]/g, '');
+    if (cleanBotPhone.startsWith('0')) cleanBotPhone = '62' + cleanBotPhone.slice(1);
+    if (!cleanBotPhone) cleanBotPhone = '6282283432739';
+
+    const waLinkEl = document.getElementById('waDirectLink');
+    if (waLinkEl) {
+      waLinkEl.href = 'https://wa.me/' + cleanBotPhone + '?text=Sudah';
     }
 
     const actionBox = document.getElementById('waActionBox');
@@ -743,19 +758,15 @@
   }
 
   function showCopied() {
-    const icon = document.getElementById('copyIcon');
     const text = document.getElementById('copyText');
     const btn = document.getElementById('btnCopyCode');
-    if (icon && text && btn) {
-      const origIcon = icon.textContent;
+    if (text && btn) {
       const origText = text.textContent;
-      icon.textContent = '✅';
       text.textContent = 'Tersalin!';
       btn.style.borderColor = '#16a34a';
       btn.style.color = '#16a34a';
       btn.style.background = '#f0fdf4';
       setTimeout(() => {
-        icon.textContent = origIcon;
         text.textContent = origText;
         btn.style.borderColor = '#0f172a';
         btn.style.color = '#0f172a';
