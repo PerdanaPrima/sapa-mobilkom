@@ -456,12 +456,12 @@
 
     <!-- Opsi Alternatif Salin / Multi-WA -->
     <div id="waAltOption" style="display: none; margin-top: 14px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; text-align: center;">
-      <div style="font-size: 11.5px; color: #64748b; margin-bottom: 6px;">Atau jika pakai WA Clone / Web:</div>
+      <div style="font-size: 11.5px; color: #64748b; margin-bottom: 6px;">Atau jika menggunakan WA Web / Multi-Akun:</div>
       <button id="btnCopyCode" onclick="copyWaText()" type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 38px; background: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; border-radius: 999px; cursor: pointer; transition: all 0.15s ease;">
         <span id="copyIcon">📋</span>
-        <span id="copyText">Salin Teks: "Sudah tautkan lokasi"</span>
+        <span id="copyText">Salin Teks Konfirmasi</span>
       </button>
-      <div style="font-size: 11.5px; color: #64748b; margin-top: 6px;">Lalu paste atau cukup balas <strong style="color: #0f172a;">"dah"</strong> di chat SAPA 😊</div>
+      <div style="font-size: 11.5px; color: #64748b; margin-top: 6px;">Kirim teks salinan atau cukup balas <strong style="color: #0f172a;">"Sudah"</strong> / <strong style="color: #0f172a;">"Siap"</strong> di chat SAPA 😊</div>
     </div>
 
     <!-- Error Message Container (Hanya jika error) -->
@@ -754,7 +754,7 @@
       document.execCommand('copy');
       showCopied();
     } catch (err) {
-      alert('Gagal menyalin otomatis. Silakan ketik "dah" di chat WhatsApp SAPA.');
+      alert('Gagal menyalin otomatis. Silakan ketik "Sudah" di chat WhatsApp SAPA.');
     }
     document.body.removeChild(textArea);
   }
