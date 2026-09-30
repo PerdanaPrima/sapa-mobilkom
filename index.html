@@ -158,6 +158,70 @@
       color: var(--brand-navy);
     }
 
+    /* 4. Live Camera Selfie Viewfinder */
+    .camera-box {
+      width: 100%;
+      max-width: 290px;
+      margin: 0 auto 24px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .camera-frame {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #0f172a;
+      border: 3px solid #1c3282;
+      box-shadow: 0 10px 28px -4px rgba(28, 50, 130, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #cameraVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Mirror effect for selfie */
+    }
+
+    .camera-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      color: #64748b;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .camera-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #16a34a;
+      background: #f0fdf4;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid #bbf7d0;
+    }
+
+    .camera-badge.off {
+      color: #dc2626;
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+
     /* 5. Tombol Presensi */
     .btn-submit {
       width: 100%;
@@ -245,12 +309,29 @@
       width: 100%;
       max-width: 320px;
       margin: 12px auto 0 auto;
-      padding: 30px 24px 26px 24px;
+      padding: 24px 20px 22px 20px;
       border-radius: 22px;
       text-align: center;
       display: none;
       border: none;
       animation: popUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .receipt-photo-wrap {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 14px auto;
+      border: 2.5px solid #1c3282;
+      box-shadow: 0 4px 12px rgba(28, 50, 130, 0.2);
+      display: none;
+    }
+
+    .receipt-photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     @keyframes popUpFade {
@@ -371,31 +452,28 @@
 
     <!-- 3. Header Presensi Masuk / Pulang -->
     <h1 class="title" id="pageTitle">Presensi Masuk</h1>
-    <p class="desc">Pastikan GPS ponsel Anda aktif untuk mencatat kehadiran.</p>
+    <p class="desc">Arahkan wajah ke kamera & pastikan GPS aktif untuk mencatat kehadiran.</p>
 
-    <!-- 4. Langkah 1, 2, 3 -->
-    <ul class="steps">
-      <li>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="8"/>
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-        </svg>
-        <span>1. Aktifkan GPS / Lokasi</span>
-      </li>
-      <li>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="m9 12 2 2 4-4"/>
-        </svg>
-        <span>2. Izinkan Akses Browser</span>
-      </li>
-      <li>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-        <span>3. Tekan Kirim Presensi</span>
-      </li>
-    </ul>
+    <!-- 4. Live Camera Selfie Viewfinder -->
+    <div class="camera-box">
+      <div class="camera-frame">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <div id="cameraPlaceholder" class="camera-placeholder">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span style="font-size: 11px; margin-top: 8px; font-weight: 600;">Memuat Kamera...</span>
+        </div>
+      </div>
+      <div id="cameraStatusBadge" class="camera-badge">
+        <span class="pulse-dot"></span>
+        <span id="cameraStatusText">Kamera Aktif</span>
+      </div>
+    </div>
+
+    <!-- Hidden Canvas untuk Snapshot -->
+    <canvas id="photoCanvas" style="display: none;"></canvas>
 
     <!-- 5. Tombol Presensi -->
     <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
@@ -411,6 +489,11 @@
   <!-- Kartu Struk Digital Hasil Presensi (Pop-up Tunggal) -->
   <section id="statusBox" class="status-card">
     
+    <!-- Thumbnail Foto Selfie Struk -->
+    <div id="receiptPhotoWrap" class="receipt-photo-wrap">
+      <img id="receiptPhotoImg" class="receipt-photo-img" src="" alt="Foto Selfie Presensi">
+    </div>
+
     <!-- Ikon SVG Asli Bulat -->
     <div id="resIconBox" class="receipt-icon-box success">
       <svg id="resSvgSuccess" width="28" height="28" viewBox="0 0 256 256" fill="currentColor">
@@ -482,7 +565,7 @@
   }
   const DEVICE_FINGERPRINT = getOrCreateDeviceId();
 
-  // 1. Jam Realtime WIB & Auto-deteksi Judul
+  // 1. Inisialisasi Jam Realtime WIB & Auto-deteksi Judul
   let currentScanType = 'in';
 
   function updateClock() {
@@ -511,7 +594,116 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // 2. Baca Token / User Identifier dari URL
+  // 2. Inisialisasi Live Camera Selfie WebRTC
+  let cameraStream = null;
+  let isCameraActive = false;
+
+  async function initLiveCamera() {
+    const video = document.getElementById('cameraVideo');
+    const placeholder = document.getElementById('cameraPlaceholder');
+    const badge = document.getElementById('cameraStatusBadge');
+    const badgeText = document.getElementById('cameraStatusText');
+
+    try {
+      const constraints = {
+        video: {
+          facingMode: 'user',
+          width: { ideal: 640 },
+          height: { ideal: 640 }
+        },
+        audio: false
+      };
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = cameraStream;
+      video.onloadedmetadata = () => {
+        video.play();
+        placeholder.style.display = 'none';
+        isCameraActive = true;
+        badge.className = 'camera-badge';
+        badgeText.textContent = 'Kamera Aktif';
+      };
+    } catch (err) {
+      console.warn('Gagal membuka kamera depan otomatis:', err);
+      placeholder.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+        <span style="font-size: 11px; margin-top: 6px; font-weight: 700; color: #dc2626;">Izinkan Akses Kamera</span>
+      `;
+      badge.className = 'camera-badge off';
+      badgeText.textContent = 'Kamera Belum Diizinkan';
+      isCameraActive = false;
+    }
+  }
+
+  // Mulai inisialisasi kamera langsung saat halaman dimuat
+  window.addEventListener('DOMContentLoaded', () => {
+    initLiveCamera();
+  });
+
+  // 3. Tangkap Snapshot Foto Selfie dengan Watermark Resmi
+  async function capturePhotoBlob(lat, lng) {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('photoCanvas');
+
+    if (!isCameraActive || !video || video.videoWidth === 0) {
+      // Coba re-request izin kamera jika belum aktif
+      try {
+        await initLiveCamera();
+      } catch(e) {}
+    }
+
+    const vw = video.videoWidth || 480;
+    const vh = video.videoHeight || 480;
+    const size = Math.min(vw, vh, 480);
+
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Crop center square & mirror selfie
+    ctx.save();
+    ctx.translate(size, 0);
+    ctx.scale(-1, 1);
+
+    const sx = (vw - size) / 2;
+    const sy = (vh - size) / 2;
+    ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
+    ctx.restore();
+
+    // Tambahkan Watermark Resmi Anti-Manipulasi di bawah foto
+    const now = new Date();
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const wibDate = new Date(utc + (3600000 * 7));
+    const timeStr = wibDate.toTimeString().split(' ')[0] + ' WIB';
+    const dateStr = `${wibDate.getDate().toString().padStart(2,'0')}/${(wibDate.getMonth()+1).toString().padStart(2,'0')}/${wibDate.getFullYear()}`;
+
+    // Gradient bar latar teks watermark
+    const grad = ctx.createLinearGradient(0, size - 44, 0, size);
+    grad.addColorStop(0, 'rgba(15, 23, 42, 0)');
+    grad.addColorStop(1, 'rgba(15, 23, 42, 0.85)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, size - 44, size, 44);
+
+    // Teks Watermark
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`SAPA • ${dateStr} ${timeStr}`, 10, size - 24);
+    ctx.font = '10px sans-serif';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText(`GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, 10, size - 10);
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        resolve(blob);
+      }, 'image/jpeg', 0.68); // JPEG 68% optimal compression (~45-55 KB)
+    });
+  }
+
+  // 4. Baca Token / User Identifier dari URL
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('t') || urlParams.get('token') || urlParams.get('u') || urlParams.get('user');
 
@@ -529,7 +721,6 @@
     }
   }
 
-  // 3. Inisialisasi Halaman
   if (!token) {
     document.getElementById('btnAction').disabled = true;
     showError('Tautan presensi tidak lengkap atau tidak terdaftar. Hubungi admin HRD atau ketik "Absen" di WhatsApp SAPA.');
@@ -542,9 +733,12 @@
     const btnText = document.getElementById('btnText');
     btn.disabled = false;
     btnText.textContent = 'Kirim Presensi';
+    if (!isCameraActive) {
+      initLiveCamera();
+    }
   }
 
-  // 4. Eksekusi Presensi
+  // 5. Eksekusi Presensi dengan Validasi Anti-Manipulasi & Upload Foto
   async function submitAttendance() {
     const btn = document.getElementById('btnAction');
     const btnText = document.getElementById('btnText');
@@ -569,11 +763,54 @@
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Menyimpan...';
-
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const acc = pos.coords.accuracy;
+
+        // Anti-Manipulasi Layer 1: Validasi Akurasi GPS (Fake GPS Filter)
+        if (acc <= 0 || acc > 150) {
+          showError(`Akurasi sinyal GPS Anda tidak valid (${Math.round(acc)}m) atau terindikasi fake GPS. Pastikan GPS Presisi Tinggi aktif dan berada di area terbuka.`);
+          btn.disabled = false;
+          btnText.textContent = 'Coba Lagi';
+          return;
+        }
+
+        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengambil Foto...';
+
+        // Ambil Foto Snapshot Selfie
+        let photoBlob = null;
+        let photoPublicUrl = null;
+        try {
+          photoBlob = await capturePhotoBlob(lat, lng);
+        } catch(e) {
+          console.warn('Gagal capture photo:', e);
+        }
+
+        // Upload Foto ke Supabase Storage (geotag_photos)
+        if (photoBlob) {
+          btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengunggah Bukti...';
+          try {
+            const cleanTok = String(token).replace(/[^a-zA-Z0-9]/g, '').substring(0, 10);
+            const photoFileName = `geo_${cleanTok}_${Date.now()}.jpg`;
+            const upRes = await fetch(`${SUPABASE_URL}/storage/v1/object/geotag_photos/${photoFileName}`, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'image/jpeg',
+                'x-upsert': 'true'
+              },
+              body: photoBlob
+            });
+            if (upRes.ok) {
+              photoPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/geotag_photos/${photoFileName}`;
+            }
+          } catch(eUp) {
+            console.warn('Gagal upload ke Supabase Storage:', eUp);
+          }
+        }
+
+        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Menyimpan...';
 
         let data = null;
         let successRpc = false;
@@ -585,7 +822,8 @@
           p_accuracy: acc,
           p_scan_type: currentScanType,
           p_device_fingerprint: DEVICE_FINGERPRINT,
-          p_user_agent: navigator.userAgent
+          p_user_agent: navigator.userAgent,
+          photo_url: photoPublicUrl
         };
 
         // 1. Coba panggil Supabase RPC
@@ -634,7 +872,7 @@
         }
 
         if (data && data.success) {
-          showSuccess(data);
+          showSuccess(data, photoPublicUrl);
         } else {
           const errMessage = (data && data.message) ? data.message : 'Terjadi kendala saat mencatat presensi.';
           showError(errMessage);
@@ -665,8 +903,15 @@
   }
 
   // TAMPILKAN HANYA KARTU HASIL (FORM SEBELUMNYA DI-HIDE TOTAL)
-  function showSuccess(data) {
+  function showSuccess(data, photoUrl) {
     document.getElementById('formSection').style.display = 'none';
+
+    // Matikan stream kamera untuk menghemat baterai HP
+    if (cameraStream) {
+      try {
+        cameraStream.getTracks().forEach(track => track.stop());
+      } catch(e) {}
+    }
 
     const box = document.getElementById('statusBox');
     box.className = 'status-card success';
@@ -674,6 +919,16 @@
 
     const isEntryIn = (data.scan_type || currentScanType) === 'in';
     document.getElementById('resTitle').textContent = 'Konfirmasi di WhatsApp';
+
+    // Tampilkan thumbnail foto selfie jika tersedia
+    const photoWrap = document.getElementById('receiptPhotoWrap');
+    const photoImg = document.getElementById('receiptPhotoImg');
+    if (photoUrl && photoWrap && photoImg) {
+      photoImg.src = photoUrl;
+      photoWrap.style.display = 'block';
+    } else {
+      photoWrap.style.display = 'none';
+    }
 
     document.getElementById('resIconBox').className = 'receipt-icon-box success';
     document.getElementById('resSvgSuccess').style.display = 'block';
