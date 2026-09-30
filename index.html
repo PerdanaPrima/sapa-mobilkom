@@ -384,10 +384,10 @@
       </li>
       <li>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="m9 12 2 2 4-4"/>
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
         </svg>
-        <span>2. Izinkan Akses Browser</span>
+        <span>2. Izinkan Akses Kamera & GPS</span>
       </li>
       <li>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -396,6 +396,20 @@
         <span>3. Tekan Kirim Presensi</span>
       </li>
     </ul>
+
+    <!-- Pratinjau Kamera Live (Selfie Anti-Titip Absen) -->
+    <div id="cameraCard" style="width: 100%; max-width: 290px; margin: 0 auto 28px auto; position: relative; border-radius: 20px; overflow: hidden; background: #0f172a; aspect-ratio: 4/3; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15); display: flex; align-items: center; justify-content: center;">
+      <video id="cameraVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+      <div id="cameraOverlay" style="position: absolute; bottom: 8px; left: 8px; right: 8px; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); color: #fff; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+        <span id="camStatusText">📷 Kamera Live Siap</span>
+        <span style="font-size: 9.5px; opacity: 0.85; color: #93c5fd;">Selfie Presensi</span>
+      </div>
+      <div id="cameraPlaceholder" style="position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; color: #64748b; padding: 16px; text-align: center;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px; color: #94a3b8;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span style="font-size: 12px; font-weight: 600;">Kamera Aktif Otomatis</span>
+      </div>
+    </div>
+    <canvas id="snapshotCanvas" style="display: none;"></canvas>
 
     <!-- 5. Tombol Presensi -->
     <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
@@ -529,7 +543,107 @@
     }
   }
 
-  // 3. Inisialisasi Halaman
+  // 3. Inisialisasi Kamera Live
+  let mediaStream = null;
+
+  async function initCamera() {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const constraints = {
+          video: {
+            facingMode: 'user',
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
+        };
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videoEl = document.getElementById('cameraVideo');
+        if (videoEl) {
+          videoEl.srcObject = mediaStream;
+          videoEl.play().catch(() => {});
+        }
+        const ph = document.getElementById('cameraPlaceholder');
+        if (ph) ph.style.display = 'none';
+      }
+    } catch (err) {
+      console.warn("Camera init warning:", err);
+      const ph = document.getElementById('cameraPlaceholder');
+      if (ph) ph.style.display = 'flex';
+      const camStatus = document.getElementById('camStatusText');
+      if (camStatus) camStatus.textContent = '⚠️ Kamera Terkunci / Non-HTTPS';
+    }
+  }
+
+  function stopCamera() {
+    if (mediaStream) {
+      try {
+        mediaStream.getTracks().forEach(track => track.stop());
+      } catch(e) {}
+      mediaStream = null;
+    }
+  }
+
+  async function captureLivePhotoBlob(lat, lng) {
+    try {
+      const video = document.getElementById('cameraVideo');
+      if (!video || !video.videoWidth) {
+        return null;
+      }
+      const canvas = document.getElementById('snapshotCanvas');
+      if (!canvas) return null;
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+
+      // Gambar frame video mirror selfie
+      ctx.save();
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      // Watermark bar gradient di bagian bawah
+      const bannerH = Math.max(55, Math.floor(canvas.height * 0.16));
+      const gradient = ctx.createLinearGradient(0, canvas.height - bannerH, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, canvas.height - bannerH, canvas.width, bannerH);
+
+      // Teks Watermark
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const wibDate = new Date(utc + (3600000 * 7));
+      const pad = (n) => String(n).padStart(2, '0');
+      const dateStr = `${wibDate.getFullYear()}-${pad(wibDate.getMonth() + 1)}-${pad(wibDate.getDate())}`;
+      const timeStr = `${pad(wibDate.getHours())}:${pad(wibDate.getMinutes())}:${pad(wibDate.getSeconds())} WIB`;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(`📍 SAPA LIVE GEOTAG • ${dateStr} ${timeStr}`, 16, canvas.height - 28);
+
+      ctx.fillStyle = '#93c5fd';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(`GPS: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`, 16, canvas.height - 10);
+
+      return new Promise((res) => {
+        canvas.toBlob((blob) => {
+          res(blob);
+        }, 'image/jpeg', 0.85);
+      });
+    } catch (e) {
+      console.warn("Capture frame error:", e);
+      return null;
+    }
+  }
+
+  // Mulai kamera otomatis saat halaman dibuka
+  window.addEventListener('DOMContentLoaded', initCamera);
+  initCamera();
+
+  // 4. Inisialisasi Halaman
   if (!token) {
     document.getElementById('btnAction').disabled = true;
     showError('Tautan presensi tidak lengkap atau tidak terdaftar. Hubungi admin HRD atau ketik "Absen" di WhatsApp SAPA.');
@@ -542,9 +656,10 @@
     const btnText = document.getElementById('btnText');
     btn.disabled = false;
     btnText.textContent = 'Kirim Presensi';
+    initCamera();
   }
 
-  // 4. Eksekusi Presensi
+  // 5. Eksekusi Presensi
   async function submitAttendance() {
     const btn = document.getElementById('btnAction');
     const btnText = document.getElementById('btnText');
@@ -569,11 +684,36 @@
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Menyimpan...';
-
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const acc = pos.coords.accuracy;
+
+        // 1. Ambil snapshot selfie kamera & unggah ke Supabase Storage
+        let photoUrl = null;
+        try {
+          btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengambil Foto...';
+          const photoBlob = await captureLivePhotoBlob(lat, lng);
+          if (photoBlob) {
+            btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengunggah Foto...';
+            const photoFileName = `geotag_${token || 'anon'}_${Date.now()}.jpg`;
+            const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/geotag_photos/${photoFileName}`, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'image/jpeg'
+              },
+              body: photoBlob
+            });
+            if (uploadRes.ok) {
+              photoUrl = `${SUPABASE_URL}/storage/v1/object/public/geotag_photos/${photoFileName}`;
+            }
+          }
+        } catch (ePhoto) {
+          console.warn("Upload photo warning:", ePhoto);
+        }
+
+        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Menyimpan Presensi...';
 
         let data = null;
         let successRpc = false;
@@ -585,10 +725,11 @@
           p_accuracy: acc,
           p_scan_type: currentScanType,
           p_device_fingerprint: DEVICE_FINGERPRINT,
-          p_user_agent: navigator.userAgent
+          p_user_agent: navigator.userAgent,
+          p_photo_url: photoUrl
         };
 
-        // 1. Coba panggil Supabase RPC
+        // 2. Coba panggil Supabase RPC
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
             method: 'POST',
@@ -601,7 +742,8 @@
               p_token: token,
               p_latitude: lat,
               p_longitude: lng,
-              p_accuracy: acc
+              p_accuracy: acc,
+              p_photo_url: photoUrl
             })
           });
           if (res.ok) {
@@ -617,7 +759,7 @@
           // fallback
         }
 
-        // 2. Fallback ke endpoint server SAPA
+        // 3. Fallback ke endpoint server SAPA jika RPC gagal
         if (!successRpc || !data || data.code === 'PGRST202' || (data.message && data.message.includes('schema cache'))) {
           try {
             const resFallback = await fetch('/api/geotag/submit', {
@@ -633,7 +775,26 @@
           }
         }
 
+        // 4. Update photo_url langsung ke record geolocation_attendances jika ada photoUrl
+        if (photoUrl) {
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/geolocation_attendances?token_id=eq.${token}&order=created_at.desc&limit=1`, {
+              method: 'PATCH',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({ photo_url: photoUrl })
+            });
+          } catch (ePatch) {
+            // ignore
+          }
+        }
+
         if (data && data.success) {
+          stopCamera();
           showSuccess(data);
         } else {
           const errMessage = (data && data.message) ? data.message : 'Terjadi kendala saat mencatat presensi.';
