@@ -729,7 +729,7 @@
           p_photo_url: photoUrl
         };
 
-        // 2. Coba panggil Supabase RPC
+        // 2. Panggil Supabase RPC (4 Parameter Standar)
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
             method: 'POST',
@@ -742,8 +742,7 @@
               p_token: token,
               p_latitude: lat,
               p_longitude: lng,
-              p_accuracy: acc,
-              p_photo_url: photoUrl
+              p_accuracy: acc
             })
           });
           if (res.ok) {
