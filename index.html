@@ -43,7 +43,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 12px 16px 16px 16px;
+      padding: 14px 16px 16px 16px;
     }
 
     .wrap {
@@ -53,92 +53,102 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 10px;
       text-align: center;
     }
 
-    /* 1. Logo SAPA (Top Fixed) */
-    .logo-container {
+    /* Group 1: Logo SAPA (Top Brand) */
+    .group-brand {
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 2px 0 6px 0;
+      padding-top: 4px;
+      padding-bottom: 2px;
       flex-shrink: 0;
     }
 
     .logo {
       height: 32px;
       width: auto;
-      max-width: 140px;
+      max-width: 130px;
       object-fit: contain;
     }
 
     /* Kontainer Bagian Form Presensi */
-    #formSection {
+    .form-section {
       width: 100%;
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       align-items: center;
+      justify-content: flex-start;
+      gap: 9px;
       animation: fadeIn 0.3s ease;
-      min-height: 0;
     }
 
-    .form-top-block {
+    /* Group 2: Header Context (Jam WIB & Status Presensi) */
+    .group-header {
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
+      gap: 1px;
       flex-shrink: 0;
     }
 
-    /* 2. Jam WIB (Clean Text Minimalis) */
     .time-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       color: var(--text-secondary);
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.3px;
-      margin-bottom: 2px;
       background: transparent;
       border: none;
       padding: 0;
+      line-height: 1.2;
     }
 
-    /* 3. Header Presensi */
     .title {
       font-family: 'Funnel Display', 'Manrope', sans-serif;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 6px;
+      margin: 0;
       letter-spacing: -0.02em;
+      line-height: 1.25;
     }
 
-    /* 4. Tiga Komponen Langkah */
-    .steps {
+    /* Group 3: Langkah 1, 2, 3 (Instruksi Rapat & Rapi) */
+    .group-steps {
       width: 100%;
       max-width: 270px;
+      flex-shrink: 0;
+    }
+
+    .steps {
+      width: 100%;
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      margin: 0 auto 6px auto;
+      gap: 3.5px;
+      margin: 0 auto;
+      padding: 0;
     }
 
     .steps li {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       background: #f8fafc;
-      padding: 4.5px 10px;
+      padding: 4px 8px;
       border-radius: var(--radius-pill);
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 600;
       color: var(--text-main);
       border: none;
@@ -152,25 +162,82 @@
       color: var(--brand-navy);
     }
 
-    /* 5. Tombol Presensi */
+    /* Group 4: Action (Kamera Live Selfie & Tombol Kirim Presensi) */
+    .group-action {
+      width: 100%;
+      max-width: 280px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .camera-card {
+      width: 100%;
+      flex: 1;
+      min-height: 140px;
+      max-height: 250px;
+      aspect-ratio: 4/3;
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #0f172a;
+      box-shadow: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .camera-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .camera-placeholder {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      color: #64748b;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .camera-placeholder svg {
+      margin-bottom: 6px;
+      color: #94a3b8;
+    }
+
+    .camera-placeholder span {
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    /* Tombol Presensi */
     .btn-submit {
       width: 100%;
-      max-width: 270px;
-      height: 48px;
+      height: 46px;
       background: var(--brand-navy);
       color: #ffffff;
       border: none;
       border-radius: var(--radius-pill);
       font-family: 'Manrope', sans-serif;
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 14px -2px rgba(28, 50, 130, 0.28);
-      margin: 8px auto 0 auto;
+      box-shadow: 0 4px 12px -2px rgba(28, 50, 130, 0.25);
       flex-shrink: 0;
     }
 
@@ -194,17 +261,17 @@
 
     .btn-external {
       width: 100%;
-      max-width: 290px;
-      height: 46px;
+      max-width: 280px;
+      height: 44px;
       background: #ffffff;
       color: var(--brand-navy);
       border: 1.5px solid var(--brand-navy);
       border-radius: var(--radius-pill);
       font-family: 'Manrope', sans-serif;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      margin: 16px auto 0 auto;
+      margin-top: 4px;
       display: none;
     }
 
@@ -351,64 +418,67 @@
 
 <main class="wrap">
   
-  <!-- 1. Logo SAPA (Selalu Tampil di Atas) -->
-  <div class="logo-container">
+  <!-- Group 1: Logo SAPA (Top Brand) -->
+  <div class="group-brand">
     <img src="img/sapa_logo.png" alt="SAPA Logo" class="logo" onerror="this.onerror=null; this.src='img/mobilkom_logo.png';">
   </div>
 
   <!-- Kontainer Form Input (Di-hide otomatis ketika presensi sukses) -->
-  <div id="formSection">
-    <!-- 2. Jam WIB -->
-    <div class="time-badge">
-      <span id="liveClock">--:--:-- WIB</span>
-    </div>
-
-    <!-- 3. Header Presensi Masuk / Pulang -->
-    <h1 class="title" id="pageTitle">Presensi Masuk</h1>
-
-    <!-- 4. Langkah 1, 2, 3 -->
-    <ul class="steps">
-      <li>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="8"/>
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
-        </svg>
-        <span>1. Aktifkan GPS / Lokasi</span>
-      </li>
-      <li>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-          <circle cx="12" cy="13" r="4"/>
-        </svg>
-        <span>2. Izinkan Akses Kamera & GPS</span>
-      </li>
-      <li>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-        <span>3. Tekan Kirim Presensi</span>
-      </li>
-    </ul>
-
-    <!-- Pratinjau Kamera Live (Selfie Anti-Titip Absen) -->
-    <div id="cameraCard" style="width: 100%; max-width: 280px; flex: 1; min-height: 160px; max-height: 260px; margin: 4px auto 8px auto; position: relative; border-radius: 18px; overflow: hidden; background: #0f172a; aspect-ratio: 4/3; box-shadow: none; display: flex; align-items: center; justify-content: center;">
-      <video id="cameraVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
-      <div id="cameraPlaceholder" style="position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; color: #64748b; padding: 16px; text-align: center;">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px; color: #94a3b8;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span style="font-size: 12px; font-weight: 600;">Kamera Aktif Otomatis</span>
+  <div id="formSection" class="form-section">
+    <!-- Group 2: Header Jam & Status Presensi -->
+    <div class="group-header">
+      <div class="time-badge">
+        <span id="liveClock">--:--:-- WIB</span>
       </div>
+      <h1 class="title" id="pageTitle">Presensi Masuk</h1>
     </div>
-    <canvas id="snapshotCanvas" style="display: none;"></canvas>
 
-    <!-- 5. Tombol Presensi -->
-    <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
-      <span id="btnText">Kirim Presensi</span>
-    </button>
+    <!-- Group 3: Langkah 1, 2, 3 (Instruksi Rapat & Rapi) -->
+    <div class="group-steps">
+      <ul class="steps">
+        <li>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="8"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          </svg>
+          <span>1. Aktifkan GPS / Lokasi</span>
+        </li>
+        <li>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>2. Izinkan Akses Kamera & GPS</span>
+        </li>
+        <li>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+          <span>3. Tekan Kirim Presensi</span>
+        </li>
+      </ul>
+    </div>
 
-    <!-- Tombol Buka di Chrome jika di WebView WA -->
-    <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
-      Buka di Google Chrome
-    </button>
+    <!-- Group 4: Action (Kamera Live Selfie & Tombol Kirim Presensi) -->
+    <div class="group-action">
+      <div id="cameraCard" class="camera-card">
+        <video id="cameraVideo" autoplay playsinline muted></video>
+        <div id="cameraPlaceholder" class="camera-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>Kamera Aktif Otomatis</span>
+        </div>
+      </div>
+      <canvas id="snapshotCanvas" style="display: none;"></canvas>
+
+      <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
+        <span id="btnText">Kirim Presensi</span>
+      </button>
+
+      <!-- Tombol Buka di Chrome jika di WebView WA -->
+      <button id="btnOpenBrowser" class="btn-external" onclick="openExternalBrowser()">
+        Buka di Google Chrome
+      </button>
+    </div>
   </div>
 
   <!-- Kartu Struk Digital Hasil Presensi (Pop-up Tunggal) -->
