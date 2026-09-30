@@ -158,70 +158,6 @@
       color: var(--brand-navy);
     }
 
-    /* 4. Live Camera Selfie Viewfinder */
-    .camera-box {
-      width: 100%;
-      max-width: 290px;
-      margin: 0 auto 24px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .camera-frame {
-      position: relative;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      overflow: hidden;
-      background: #0f172a;
-      border: 3px solid #1c3282;
-      box-shadow: 0 10px 28px -4px rgba(28, 50, 130, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #cameraVideo {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transform: scaleX(-1); /* Mirror effect for selfie */
-    }
-
-    .camera-placeholder {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #f1f5f9;
-      color: #64748b;
-      padding: 16px;
-      text-align: center;
-    }
-
-    .camera-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #16a34a;
-      background: #f0fdf4;
-      padding: 4px 12px;
-      border-radius: var(--radius-pill);
-      border: 1px solid #bbf7d0;
-    }
-
-    .camera-badge.off {
-      color: #dc2626;
-      background: #fef2f2;
-      border-color: #fecaca;
-    }
-
     /* 5. Tombol Presensi */
     .btn-submit {
       width: 100%;
@@ -309,29 +245,12 @@
       width: 100%;
       max-width: 320px;
       margin: 12px auto 0 auto;
-      padding: 24px 20px 22px 20px;
+      padding: 30px 24px 26px 24px;
       border-radius: 22px;
       text-align: center;
       display: none;
       border: none;
       animation: popUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    .receipt-photo-wrap {
-      width: 84px;
-      height: 84px;
-      border-radius: 50%;
-      overflow: hidden;
-      margin: 0 auto 14px auto;
-      border: 2.5px solid #1c3282;
-      box-shadow: 0 4px 12px rgba(28, 50, 130, 0.2);
-      display: none;
-    }
-
-    .receipt-photo-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
 
     @keyframes popUpFade {
@@ -452,28 +371,31 @@
 
     <!-- 3. Header Presensi Masuk / Pulang -->
     <h1 class="title" id="pageTitle">Presensi Masuk</h1>
-    <p class="desc">Arahkan wajah ke kamera & pastikan GPS aktif untuk mencatat kehadiran.</p>
+    <p class="desc">Pastikan GPS ponsel Anda aktif untuk mencatat kehadiran.</p>
 
-    <!-- 4. Live Camera Selfie Viewfinder -->
-    <div class="camera-box">
-      <div class="camera-frame">
-        <video id="cameraVideo" autoplay playsinline muted></video>
-        <div id="cameraPlaceholder" class="camera-placeholder">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-            <circle cx="12" cy="13" r="4"/>
-          </svg>
-          <span style="font-size: 11px; margin-top: 8px; font-weight: 600;">Memuat Kamera...</span>
-        </div>
-      </div>
-      <div id="cameraStatusBadge" class="camera-badge">
-        <span class="pulse-dot"></span>
-        <span id="cameraStatusText">Kamera Aktif</span>
-      </div>
-    </div>
-
-    <!-- Hidden Canvas untuk Snapshot -->
-    <canvas id="photoCanvas" style="display: none;"></canvas>
+    <!-- 4. Langkah 1, 2, 3 -->
+    <ul class="steps">
+      <li>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8"/>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+        </svg>
+        <span>1. Aktifkan GPS / Lokasi</span>
+      </li>
+      <li>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>2. Izinkan Akses Browser</span>
+      </li>
+      <li>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+        <span>3. Tekan Kirim Presensi</span>
+      </li>
+    </ul>
 
     <!-- 5. Tombol Presensi -->
     <button id="btnAction" class="btn-submit" onclick="submitAttendance()">
@@ -489,11 +411,6 @@
   <!-- Kartu Struk Digital Hasil Presensi (Pop-up Tunggal) -->
   <section id="statusBox" class="status-card">
     
-    <!-- Thumbnail Foto Selfie Struk -->
-    <div id="receiptPhotoWrap" class="receipt-photo-wrap">
-      <img id="receiptPhotoImg" class="receipt-photo-img" src="" alt="Foto Selfie Presensi">
-    </div>
-
     <!-- Ikon SVG Asli Bulat -->
     <div id="resIconBox" class="receipt-icon-box success">
       <svg id="resSvgSuccess" width="28" height="28" viewBox="0 0 256 256" fill="currentColor">
@@ -565,7 +482,7 @@
   }
   const DEVICE_FINGERPRINT = getOrCreateDeviceId();
 
-  // 1. Inisialisasi Jam Realtime WIB & Auto-deteksi Judul
+  // 1. Jam Realtime WIB & Auto-deteksi Judul
   let currentScanType = 'in';
 
   function updateClock() {
@@ -594,116 +511,7 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // 2. Inisialisasi Live Camera Selfie WebRTC
-  let cameraStream = null;
-  let isCameraActive = false;
-
-  async function initLiveCamera() {
-    const video = document.getElementById('cameraVideo');
-    const placeholder = document.getElementById('cameraPlaceholder');
-    const badge = document.getElementById('cameraStatusBadge');
-    const badgeText = document.getElementById('cameraStatusText');
-
-    try {
-      const constraints = {
-        video: {
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 640 }
-        },
-        audio: false
-      };
-      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-      video.srcObject = cameraStream;
-      video.onloadedmetadata = () => {
-        video.play();
-        placeholder.style.display = 'none';
-        isCameraActive = true;
-        badge.className = 'camera-badge';
-        badgeText.textContent = 'Kamera Aktif';
-      };
-    } catch (err) {
-      console.warn('Gagal membuka kamera depan otomatis:', err);
-      placeholder.innerHTML = `
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
-        </svg>
-        <span style="font-size: 11px; margin-top: 6px; font-weight: 700; color: #dc2626;">Izinkan Akses Kamera</span>
-      `;
-      badge.className = 'camera-badge off';
-      badgeText.textContent = 'Kamera Belum Diizinkan';
-      isCameraActive = false;
-    }
-  }
-
-  // Mulai inisialisasi kamera langsung saat halaman dimuat
-  window.addEventListener('DOMContentLoaded', () => {
-    initLiveCamera();
-  });
-
-  // 3. Tangkap Snapshot Foto Selfie dengan Watermark Resmi
-  async function capturePhotoBlob(lat, lng) {
-    const video = document.getElementById('cameraVideo');
-    const canvas = document.getElementById('photoCanvas');
-
-    if (!isCameraActive || !video || video.videoWidth === 0) {
-      // Coba re-request izin kamera jika belum aktif
-      try {
-        await initLiveCamera();
-      } catch(e) {}
-    }
-
-    const vw = video.videoWidth || 480;
-    const vh = video.videoHeight || 480;
-    const size = Math.min(vw, vh, 480);
-
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-
-    // Crop center square & mirror selfie
-    ctx.save();
-    ctx.translate(size, 0);
-    ctx.scale(-1, 1);
-
-    const sx = (vw - size) / 2;
-    const sy = (vh - size) / 2;
-    ctx.drawImage(video, sx, sy, size, size, 0, 0, size, size);
-    ctx.restore();
-
-    // Tambahkan Watermark Resmi Anti-Manipulasi di bawah foto
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const wibDate = new Date(utc + (3600000 * 7));
-    const timeStr = wibDate.toTimeString().split(' ')[0] + ' WIB';
-    const dateStr = `${wibDate.getDate().toString().padStart(2,'0')}/${(wibDate.getMonth()+1).toString().padStart(2,'0')}/${wibDate.getFullYear()}`;
-
-    // Gradient bar latar teks watermark
-    const grad = ctx.createLinearGradient(0, size - 44, 0, size);
-    grad.addColorStop(0, 'rgba(15, 23, 42, 0)');
-    grad.addColorStop(1, 'rgba(15, 23, 42, 0.85)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, size - 44, size, 44);
-
-    // Teks Watermark
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`SAPA • ${dateStr} ${timeStr}`, 10, size - 24);
-    ctx.font = '10px sans-serif';
-    ctx.fillStyle = '#cbd5e1';
-    ctx.fillText(`GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)}`, 10, size - 10);
-
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        resolve(blob);
-      }, 'image/jpeg', 0.68); // JPEG 68% optimal compression (~45-55 KB)
-    });
-  }
-
-  // 4. Baca Token / User Identifier dari URL
+  // 2. Baca Token / User Identifier dari URL
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('t') || urlParams.get('token') || urlParams.get('u') || urlParams.get('user');
 
@@ -721,6 +529,7 @@
     }
   }
 
+  // 3. Inisialisasi Halaman
   if (!token) {
     document.getElementById('btnAction').disabled = true;
     showError('Tautan presensi tidak lengkap atau tidak terdaftar. Hubungi admin HRD atau ketik "Absen" di WhatsApp SAPA.');
@@ -733,12 +542,9 @@
     const btnText = document.getElementById('btnText');
     btn.disabled = false;
     btnText.textContent = 'Kirim Presensi';
-    if (!isCameraActive) {
-      initLiveCamera();
-    }
   }
 
-  // 5. Eksekusi Presensi dengan Validasi Anti-Manipulasi & Upload Foto
+  // 4. Eksekusi Presensi
   async function submitAttendance() {
     const btn = document.getElementById('btnAction');
     const btnText = document.getElementById('btnText');
@@ -763,54 +569,11 @@
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Menyimpan...';
+
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         const acc = pos.coords.accuracy;
-
-        // Anti-Manipulasi Layer 1: Validasi Akurasi GPS (Fake GPS Filter)
-        if (acc <= 0 || acc > 150) {
-          showError(`Akurasi sinyal GPS Anda tidak valid (${Math.round(acc)}m) atau terindikasi fake GPS. Pastikan GPS Presisi Tinggi aktif dan berada di area terbuka.`);
-          btn.disabled = false;
-          btnText.textContent = 'Coba Lagi';
-          return;
-        }
-
-        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengambil Foto...';
-
-        // Ambil Foto Snapshot Selfie
-        let photoBlob = null;
-        let photoPublicUrl = null;
-        try {
-          photoBlob = await capturePhotoBlob(lat, lng);
-        } catch(e) {
-          console.warn('Gagal capture photo:', e);
-        }
-
-        // Upload Foto ke Supabase Storage (geotag_photos)
-        if (photoBlob) {
-          btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengunggah Bukti...';
-          try {
-            const cleanTok = String(token).replace(/[^a-zA-Z0-9]/g, '').substring(0, 10);
-            const photoFileName = `geo_${cleanTok}_${Date.now()}.jpg`;
-            const upRes = await fetch(`${SUPABASE_URL}/storage/v1/object/geotag_photos/${photoFileName}`, {
-              method: 'POST',
-              headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Content-Type': 'image/jpeg',
-                'x-upsert': 'true'
-              },
-              body: photoBlob
-            });
-            if (upRes.ok) {
-              photoPublicUrl = `${SUPABASE_URL}/storage/v1/object/public/geotag_photos/${photoFileName}`;
-            }
-          } catch(eUp) {
-            console.warn('Gagal upload ke Supabase Storage:', eUp);
-          }
-        }
-
-        btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Menyimpan...';
 
         let data = null;
         let successRpc = false;
@@ -822,8 +585,7 @@
           p_accuracy: acc,
           p_scan_type: currentScanType,
           p_device_fingerprint: DEVICE_FINGERPRINT,
-          p_user_agent: navigator.userAgent,
-          photo_url: photoPublicUrl
+          p_user_agent: navigator.userAgent
         };
 
         // 1. Coba panggil Supabase RPC
@@ -872,7 +634,7 @@
         }
 
         if (data && data.success) {
-          showSuccess(data, photoPublicUrl);
+          showSuccess(data);
         } else {
           const errMessage = (data && data.message) ? data.message : 'Terjadi kendala saat mencatat presensi.';
           showError(errMessage);
@@ -903,15 +665,8 @@
   }
 
   // TAMPILKAN HANYA KARTU HASIL (FORM SEBELUMNYA DI-HIDE TOTAL)
-  function showSuccess(data, photoUrl) {
+  function showSuccess(data) {
     document.getElementById('formSection').style.display = 'none';
-
-    // Matikan stream kamera untuk menghemat baterai HP
-    if (cameraStream) {
-      try {
-        cameraStream.getTracks().forEach(track => track.stop());
-      } catch(e) {}
-    }
 
     const box = document.getElementById('statusBox');
     box.className = 'status-card success';
@@ -919,16 +674,6 @@
 
     const isEntryIn = (data.scan_type || currentScanType) === 'in';
     document.getElementById('resTitle').textContent = 'Konfirmasi di WhatsApp';
-
-    // Tampilkan thumbnail foto selfie jika tersedia
-    const photoWrap = document.getElementById('receiptPhotoWrap');
-    const photoImg = document.getElementById('receiptPhotoImg');
-    if (photoUrl && photoWrap && photoImg) {
-      photoImg.src = photoUrl;
-      photoWrap.style.display = 'block';
-    } else {
-      photoWrap.style.display = 'none';
-    }
 
     document.getElementById('resIconBox').className = 'receipt-icon-box success';
     document.getElementById('resSvgSuccess').style.display = 'block';
@@ -1055,7 +800,222 @@
 
     document.getElementById('btnRetryError').style.display = 'inline-block';
   }
+
+  // ── Offline / No Internet Connection Modal Logic ──
+  let _offlineDismissed = false;
+
+  function showOfflineModal() {
+    if (_offlineDismissed) return;
+    const modal = document.getElementById('offlineModalBackdrop');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeOfflineModal() {
+    _offlineDismissed = true;
+    const modal = document.getElementById('offlineModalBackdrop');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function retryConnection() {
+    const btn = document.querySelector('.btn-offline-retry');
+    if (btn) {
+      btn.innerHTML = '<span class="spinner" style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:6px;"></span> Memeriksa...';
+    }
+    fetch(window.location.href, { method: 'HEAD', cache: 'no-store' })
+      .then(() => {
+        closeOfflineModal();
+      })
+      .catch(() => {
+        if (btn) {
+          btn.innerHTML = 'Masih Offline — Coba Lagi';
+        }
+      });
+  }
+
+  window.addEventListener('offline', () => {
+    _offlineDismissed = false;
+    showOfflineModal();
+  });
+
+  window.addEventListener('online', () => {
+    closeOfflineModal();
+  });
+
+  if (!navigator.onLine) {
+    showOfflineModal();
+  }
 </script>
+
+<!-- =========================================================================
+     OFFLINE / NO INTERNET POPUP CARD MODAL
+     ========================================================================= -->
+<div id="offlineModalBackdrop" class="offline-modal-backdrop" style="display: none;">
+  <div class="offline-modal-card" role="dialog" aria-modal="true" aria-labelledby="offlineModalTitle">
+    <!-- Close / Cross button in top right -->
+    <button type="button" class="offline-modal-close" onclick="closeOfflineModal()" aria-label="Tutup Peringatan">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Icon Wifi Off / Disconnected -->
+    <div class="offline-icon-box">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+        <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3"></line>
+      </svg>
+    </div>
+
+    <h3 id="offlineModalTitle" class="offline-modal-title">Tidak Ada Koneksi Internet</h3>
+    <p class="offline-modal-desc">
+      Ponsel Anda sedang offline / tidak terhubung ke jaringan internet. Pastikan data seluler atau Wi-Fi Anda aktif untuk mencatat presensi GPS.
+    </p>
+
+    <div class="offline-modal-actions">
+      <button type="button" class="btn-offline-retry" onclick="retryConnection()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        Coba Hubungkan Ulang
+      </button>
+      <button type="button" class="btn-offline-dismiss" onclick="closeOfflineModal()">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .offline-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: offlineFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes offlineFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .offline-modal-card {
+    position: relative;
+    width: 100%;
+    max-width: 330px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(226, 232, 240, 0.8);
+    padding: 30px 22px 24px 22px;
+    text-align: center;
+    animation: offlinePopUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes offlinePopUp {
+    from { opacity: 0; transform: scale(0.94) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .offline-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .offline-modal-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: scale(1.05);
+  }
+  .offline-icon-box {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #dc2626;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .offline-modal-title {
+    font-family: 'Funnel Display', 'Manrope', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .offline-modal-desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .offline-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .btn-offline-retry {
+    width: 100%;
+    height: 44px;
+    border-radius: 9999px;
+    background: #1c3282;
+    color: #ffffff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 14px rgba(28, 50, 130, 0.25);
+  }
+  .btn-offline-retry:hover {
+    background: #152664;
+    transform: translateY(-1px);
+  }
+  .btn-offline-dismiss {
+    width: 100%;
+    height: 38px;
+    border-radius: 9999px;
+    background: transparent;
+    color: #64748b;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-offline-dismiss:hover {
+    background: #f8fafc;
+    color: #0f172a;
+  }
+</style>
 
 </body>
 </html>
