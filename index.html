@@ -790,18 +790,15 @@
         let data = null;
         let successRpc = false;
 
-        const payload = {
+        const rpcPayload = {
           p_token: token,
           p_latitude: lat,
           p_longitude: lng,
           p_accuracy: acc,
-          p_scan_type: currentScanType,
-          p_device_fingerprint: DEVICE_FINGERPRINT,
-          p_user_agent: navigator.userAgent,
           p_photo_url: photoUrl
         };
 
-        // 2. Panggil Supabase RPC dengan Parameter Lengkap termasuk p_photo_url
+        // 2. Panggil Supabase RPC dengan 5 Parameter Valid Sesuai Schema Cache
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
             method: 'POST',
@@ -810,7 +807,7 @@
               'apikey': SUPABASE_ANON_KEY,
               'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(rpcPayload)
           });
           if (res.ok) {
             data = await res.json();
