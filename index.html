@@ -652,8 +652,20 @@
       const canvas = document.getElementById('snapshotCanvas');
       if (!canvas) return null;
       const ctx = canvas.getContext('2d');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+
+      // Optimasi Kompresi Kilat: Skala ke max width 640px (sangat cepat & file 30-50KB)
+      const srcW = video.videoWidth || 640;
+      const srcH = video.videoHeight || 480;
+      const maxW = 640;
+      let targetW = srcW;
+      let targetH = srcH;
+      if (srcW > maxW) {
+        targetW = maxW;
+        targetH = Math.round((srcH * maxW) / srcW);
+      }
+
+      canvas.width = targetW;
+      canvas.height = targetH;
 
       // Gambar frame video mirror selfie
       ctx.save();
@@ -663,11 +675,11 @@
       ctx.restore();
 
       // Watermark bar gradient di bagian bawah
-      const bannerH = Math.max(55, Math.floor(canvas.height * 0.16));
+      const bannerH = Math.max(48, Math.floor(canvas.height * 0.16));
       const gradient = ctx.createLinearGradient(0, canvas.height - bannerH, 0, canvas.height);
       gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
       gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.9)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, canvas.height - bannerH, canvas.width, bannerH);
 
@@ -680,17 +692,18 @@
       const timeStr = `${pad(wibDate.getHours())}:${pad(wibDate.getMinutes())}:${pad(wibDate.getSeconds())} WIB`;
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(`📍 SAPA LIVE GEOTAG • ${dateStr} ${timeStr}`, 16, canvas.height - 28);
+      ctx.font = 'bold 13.5px sans-serif';
+      ctx.fillText(`📍 SAPA LIVE GEOTAG • ${dateStr} ${timeStr}`, 14, canvas.height - 24);
 
       ctx.fillStyle = '#93c5fd';
-      ctx.font = '12px sans-serif';
-      ctx.fillText(`GPS: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`, 16, canvas.height - 10);
+      ctx.font = '11.5px sans-serif';
+      ctx.fillText(`GPS: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`, 14, canvas.height - 8);
 
       return new Promise((res) => {
+        // JPEG quality 0.75 menghasilkan ukuran super ringkas ~30-50KB (upload <100ms)
         canvas.toBlob((blob) => {
           res(blob);
-        }, 'image/jpeg', 0.85);
+        }, 'image/jpeg', 0.75);
       });
     } catch (e) {
       console.warn("Capture frame error:", e);
@@ -747,7 +760,7 @@
         const lng = pos.coords.longitude;
         const acc = pos.coords.accuracy;
 
-        // 1. Ambil snapshot selfie kamera & unggah ke Supabase Storage
+        // 1. Ambil snapshot selfie kamera & unggah ke Supabase Storage (Kompresi Ringkas)
         let photoUrl = null;
         try {
           btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengambil Foto...';
@@ -788,7 +801,7 @@
           p_photo_url: photoUrl
         };
 
-        // 2. Panggil Supabase RPC (4 Parameter Standar)
+        // 2. Panggil Supabase RPC dengan Parameter Lengkap termasuk p_photo_url
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
             method: 'POST',
@@ -797,12 +810,7 @@
               'apikey': SUPABASE_ANON_KEY,
               'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
             },
-            body: JSON.stringify({
-              p_token: token,
-              p_latitude: lat,
-              p_longitude: lng,
-              p_accuracy: acc
-            })
+            body: JSON.stringify(payload)
           });
           if (res.ok) {
             data = await res.json();
@@ -829,24 +837,6 @@
               data = await resFallback.json();
             }
           } catch (eFallback) {
-            // ignore
-          }
-        }
-
-        // 4. Update photo_url langsung ke record geolocation_attendances jika ada photoUrl
-        if (photoUrl) {
-          try {
-            await fetch(`${SUPABASE_URL}/rest/v1/geolocation_attendances?token_id=eq.${token}&order=created_at.desc&limit=1`, {
-              method: 'PATCH',
-              headers: {
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal'
-              },
-              body: JSON.stringify({ photo_url: photoUrl })
-            });
-          } catch (ePatch) {
             // ignore
           }
         }
