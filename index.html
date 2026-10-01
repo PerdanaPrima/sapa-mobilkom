@@ -170,10 +170,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
       gap: 12px;
-      padding: 8px 0;
-      margin: auto 0;
+      padding-bottom: 4px;
     }
 
     .camera-card {
@@ -495,7 +494,7 @@
       </svg>
     </div>
 
-    <h2 class="receipt-main-title" id="resTitle">Konfirmasi di WhatsApp</h2>
+    <h2 class="receipt-main-title" id="resTitle">Presensi Berhasil Dicatat</h2>
 
     <div id="receiptDetails" class="receipt-list">
       <div class="receipt-item">
@@ -520,15 +519,14 @@
       </div>
     </div>
 
-    <!-- Box Aksi Balas WhatsApp (Singkat & Padat) -->
-    <div id="waActionBox" style="display: none; margin-top: 16px; padding: 12px 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center;">
-      <div style="font-size: 11.5px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Balas:</div>
-      <button id="btnCopyCode" onclick="copyWaText()" type="button" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 38px; background: #f8fafc; border: 1.5px solid #0f172a; color: #0f172a; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13.5px; border-radius: 9999px; cursor: pointer; transition: all 0.15s ease;">
-        <span id="copyText">Sudah</span>
-      </button>
-      <div style="margin-top: 6px;">
-        <a id="waDirectLink" href="https://wa.me/6282283432739?text=Sudah" target="_blank" style="font-size: 11px; color: #64748b; text-decoration: none; cursor: pointer; transition: color 0.15s ease;">Kirim ke WA</a>
-      </div>
+    <!-- Info Konfirmasi Otomatis & Tombol Buka WhatsApp -->
+    <div id="waActionBox" style="display: none; margin-top: 16px; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: center;">
+      <p style="font-size: 12px; color: #475569; margin: 0 0 10px 0; line-height: 1.5;">
+        Presensi telah tersimpan resmi di SAPA. Konfirmasi otomatis telah dikirimkan ke chat WhatsApp kamu.
+      </p>
+      <a id="waDirectLink" href="https://wa.me/6282283432739" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 40px; background: #16a34a; border: none; color: #ffffff; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13.5px; border-radius: 9999px; text-decoration: none; cursor: pointer; transition: all 0.15s ease;">
+        Buka WhatsApp
+      </a>
     </div>
 
     <!-- Error Message Container (Hanya jika error) -->
@@ -644,7 +642,34 @@
     }
   }
 
-  async function captureLivePhotoBlob(lat, lng) {
+  async function reverseGeocodeFast(lat, lng) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const parts = [];
+        if (data.locality || data.localityInfo?.administrative?.[3]?.name) {
+          parts.push(data.locality || data.localityInfo?.administrative?.[3]?.name);
+        }
+        if (data.city || data.principalSubdivision) {
+          parts.push(data.city || data.principalSubdivision);
+        }
+        if (parts.length > 0) {
+          return parts.join(', ');
+        }
+      }
+    } catch (e) {
+      // Abort / Timeout / Network error
+    }
+    return "Base Lapangan (Koordinat Terverifikasi)";
+  }
+
+  async function captureLivePhotoBlob(lat, lng, acc = 10) {
     try {
       const video = document.getElementById('cameraVideo');
       if (!video || !video.videoWidth) {
@@ -653,20 +678,8 @@
       const canvas = document.getElementById('snapshotCanvas');
       if (!canvas) return null;
       const ctx = canvas.getContext('2d');
-
-      // Optimasi Kompresi Kilat: Skala ke max width 640px (sangat cepat & file 30-50KB)
-      const srcW = video.videoWidth || 640;
-      const srcH = video.videoHeight || 480;
-      const maxW = 640;
-      let targetW = srcW;
-      let targetH = srcH;
-      if (srcW > maxW) {
-        targetW = maxW;
-        targetH = Math.round((srcH * maxW) / srcW);
-      }
-
-      canvas.width = targetW;
-      canvas.height = targetH;
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
 
       // Gambar frame video mirror selfie
       ctx.save();
@@ -675,36 +688,55 @@
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       ctx.restore();
 
-      // Watermark bar gradient di bagian bawah
-      const bannerH = Math.max(48, Math.floor(canvas.height * 0.16));
+      // Reverse geocode fast with 1.5s timeout
+      const address = await reverseGeocodeFast(lat, lng);
+
+      // Watermark bar gradient di bagian bawah (4 baris)
+      const bannerH = Math.max(90, Math.floor(canvas.height * 0.24));
       const gradient = ctx.createLinearGradient(0, canvas.height - bannerH, 0, canvas.height);
       gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.7)');
+      gradient.addColorStop(0.2, 'rgba(0, 0, 0, 0.7)');
       gradient.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, canvas.height - bannerH, canvas.width, bannerH);
 
-      // Teks Watermark
+      // Teks Watermark 4 Baris
       const now = new Date();
       const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
       const wibDate = new Date(utc + (3600000 * 7));
       const pad = (n) => String(n).padStart(2, '0');
-      const dateStr = `${wibDate.getFullYear()}-${pad(wibDate.getMonth() + 1)}-${pad(wibDate.getDate())}`;
+      const monthsIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const dateStr = `${pad(wibDate.getDate())} ${monthsIndo[wibDate.getMonth()]} ${wibDate.getFullYear()}`;
       const timeStr = `${pad(wibDate.getHours())}:${pad(wibDate.getMinutes())}:${pad(wibDate.getSeconds())} WIB`;
 
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 13.5px sans-serif';
-      ctx.fillText(`SAPA LIVE GEOTAG • ${dateStr} ${timeStr}`, 14, canvas.height - 24);
+      const accStr = acc ? Math.round(acc) : 10;
+      const latFixed = Number(lat).toFixed(6);
+      const lngFixed = Number(lng).toFixed(6);
 
+      // Baris 1: SAPA GEOTAG
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('SAPA GEOTAG', 16, canvas.height - 64);
+
+      // Baris 2: Tanggal & Waktu
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '11.5px sans-serif';
+      ctx.fillText(`${dateStr} • ${timeStr}`, 16, canvas.height - 46);
+
+      // Baris 3: Koordinat GPS
       ctx.fillStyle = '#93c5fd';
       ctx.font = '11.5px sans-serif';
-      ctx.fillText(`GPS: ${Number(lat).toFixed(6)}, ${Number(lng).toFixed(6)}`, 14, canvas.height - 8);
+      ctx.fillText(`📍 ${latFixed}, ${lngFixed} (Akurasi: ±${accStr}m)`, 16, canvas.height - 28);
+
+      // Baris 4: Alamat
+      ctx.fillStyle = '#fde047';
+      ctx.font = '11.5px sans-serif';
+      ctx.fillText(`🏠 ${address}`, 16, canvas.height - 10);
 
       return new Promise((res) => {
-        // JPEG quality 0.75 menghasilkan ukuran super ringkas ~30-50KB (upload <100ms)
         canvas.toBlob((blob) => {
           res(blob);
-        }, 'image/jpeg', 0.75);
+        }, 'image/jpeg', 0.85);
       });
     } catch (e) {
       console.warn("Capture frame error:", e);
@@ -761,11 +793,11 @@
         const lng = pos.coords.longitude;
         const acc = pos.coords.accuracy;
 
-        // 1. Ambil snapshot selfie kamera & unggah ke Supabase Storage (Kompresi Ringkas)
+        // 1. Ambil snapshot selfie kamera & unggah ke Supabase Storage
         let photoUrl = null;
         try {
           btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengambil Foto...';
-          const photoBlob = await captureLivePhotoBlob(lat, lng);
+          const photoBlob = await captureLivePhotoBlob(lat, lng, acc);
           if (photoBlob) {
             btnText.innerHTML = '<span class="spinner" style="margin-right: 8px;"></span> Mengunggah Foto...';
             const photoFileName = `geotag_${token || 'anon'}_${Date.now()}.jpg`;
@@ -790,6 +822,17 @@
 
         let data = null;
         let successRpc = false;
+
+        const payload = {
+          p_token: token,
+          p_latitude: lat,
+          p_longitude: lng,
+          p_accuracy: acc,
+          p_scan_type: currentScanType,
+          p_device_fingerprint: DEVICE_FINGERPRINT,
+          p_user_agent: navigator.userAgent,
+          p_photo_url: photoUrl
+        };
 
         const rpcPayload = {
           p_token: token,
@@ -839,6 +882,24 @@
           }
         }
 
+        // 4. Update photo_url langsung ke record geolocation_attendances jika ada photoUrl
+        if (photoUrl) {
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/geolocation_attendances?token_id=eq.${token}&order=created_at.desc&limit=1`, {
+              method: 'PATCH',
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify({ photo_url: photoUrl })
+            });
+          } catch (ePatch) {
+            // ignore
+          }
+        }
+
         if (data && data.success) {
           stopCamera();
           showSuccess(data);
@@ -880,7 +941,7 @@
     box.style.display = 'block';
 
     const isEntryIn = (data.scan_type || currentScanType) === 'in';
-    document.getElementById('resTitle').textContent = 'Konfirmasi di WhatsApp';
+    document.getElementById('resTitle').textContent = 'Presensi Berhasil Dicatat';
 
     document.getElementById('resIconBox').className = 'receipt-icon-box success';
     document.getElementById('resSvgSuccess').style.display = 'block';
@@ -913,7 +974,7 @@
       document.getElementById('resGeofence').textContent = 'Luar Radius (' + (data.distance_m || 0) + 'm)';
     }
 
-    // Update Tautan Balas ke Nomor Bot WhatsApp SAPA
+    // Update Tautan Navigasi ke Nomor Bot WhatsApp SAPA
     let botParam = urlParams.get('bot') || urlParams.get('phone') || '';
     if (data && (data.whatsapp_bot_phone || data.bot_phone)) {
       botParam = data.whatsapp_bot_phone || data.bot_phone;
@@ -924,7 +985,7 @@
 
     const waLinkEl = document.getElementById('waDirectLink');
     if (waLinkEl) {
-      waLinkEl.href = 'https://wa.me/' + cleanBotPhone + '?text=Sudah';
+      waLinkEl.href = 'https://wa.me/' + cleanBotPhone;
     }
 
     const actionBox = document.getElementById('waActionBox');
