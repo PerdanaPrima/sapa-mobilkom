@@ -643,9 +643,48 @@
   }
 
   async function reverseGeocodeFast(lat, lng) {
+    // 1. Prioritas Utama: OpenStreetMap Nominatim (Detail Jalan, Kelurahan, Kecamatan, Kabupaten/Kota)
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`, {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const addr = data.address || {};
+        const parts = [];
+
+        // Nama Jalan / Fasilitas / Gedung
+        const road = addr.road || addr.pedestrian || addr.street || addr.industrial || addr.commercial || addr.highway || addr.building;
+        if (road) parts.push(road);
+
+        // Kelurahan / Desa / Lingkungan
+        const village = addr.village || addr.suburb || addr.neighbourhood || addr.quarter || addr.hamlet;
+        if (village && !parts.includes(village)) parts.push(village);
+
+        // Kecamatan
+        const subdistrict = addr.municipality || addr.subdistrict || addr.district || addr.city_district;
+        if (subdistrict && !parts.includes(subdistrict)) parts.push(subdistrict);
+
+        // Kabupaten / Kota
+        const city = addr.county || addr.city || addr.regency || addr.town;
+        if (city && !parts.includes(city)) parts.push(city);
+
+        if (parts.length > 0) {
+          return parts.join(', ');
+        }
+      }
+    } catch (e) {
+      // Nominatim timeout / network fallback
+    }
+
+    // 2. Fallback: BigDataCloud dengan deduplikasi cerdas
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
       const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`, {
         signal: controller.signal
       });
@@ -653,19 +692,37 @@
       if (res.ok) {
         const data = await res.json();
         const parts = [];
-        if (data.locality || data.localityInfo?.administrative?.[3]?.name) {
-          parts.push(data.locality || data.localityInfo?.administrative?.[3]?.name);
+        const seen = new Set();
+        const addPart = (val) => {
+          if (val && typeof val === 'string') {
+            const clean = val.trim();
+            if (clean && !seen.has(clean.toLowerCase())) {
+              seen.add(clean.toLowerCase());
+              parts.push(clean);
+            }
+          }
+        };
+
+        if (data.localityInfo?.administrative) {
+          const admins = data.localityInfo.administrative;
+          for (let i = admins.length - 1; i >= 0; i--) {
+            if (admins[i].adminLevel >= 5) {
+              addPart(admins[i].name);
+            }
+          }
         }
-        if (data.city || data.principalSubdivision) {
-          parts.push(data.city || data.principalSubdivision);
-        }
+        addPart(data.locality);
+        addPart(data.city);
+        addPart(data.principalSubdivision);
+
         if (parts.length > 0) {
           return parts.join(', ');
         }
       }
     } catch (e) {
-      // Abort / Timeout / Network error
+      // Abort / Network error
     }
+
     return "Base Lapangan (Koordinat Terverifikasi)";
   }
 
@@ -688,7 +745,7 @@
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       ctx.restore();
 
-      // Reverse geocode fast with 1.5s timeout
+      // Reverse geocode fast dengan detail jalan & kelurahan
       const address = await reverseGeocodeFast(lat, lng);
 
       // Watermark bar gradient di bagian bawah (4 baris)
@@ -728,10 +785,17 @@
       ctx.font = '11.5px sans-serif';
       ctx.fillText(`📍 ${latFixed}, ${lngFixed} (Akurasi: ±${accStr}m)`, 16, canvas.height - 28);
 
-      // Baris 4: Alamat
+      // Baris 4: Alamat Lengkap (Jalan, Kelurahan, Kecamatan, Kota/Kabupaten)
       ctx.fillStyle = '#fde047';
       ctx.font = '11.5px sans-serif';
-      ctx.fillText(`🏠 ${address}`, 16, canvas.height - 10);
+      let displayAddress = address;
+      if (ctx.measureText(`🏠 ${displayAddress}`).width > canvas.width - 32) {
+        while (displayAddress.length > 10 && ctx.measureText(`🏠 ${displayAddress}...`).width > canvas.width - 32) {
+          displayAddress = displayAddress.substring(0, displayAddress.length - 2);
+        }
+        displayAddress += '...';
+      }
+      ctx.fillText(`🏠 ${displayAddress}`, 16, canvas.height - 10);
 
       return new Promise((res) => {
         canvas.toBlob((blob) => {
