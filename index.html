@@ -285,20 +285,27 @@
        STRUK DIGITAL HASIL PRESENSI (CLEAN POP-UP CARD ONLY)
        ========================================================================= */
     .status-card {
-      width: 100%;
+      /* Tampil di tengah layar secara vertikal dan horizontal via fixed positioning */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% - 40px);
       max-width: 320px;
-      margin: 12px auto 0 auto;
       padding: 28px 22px 24px 22px;
       border-radius: 22px;
       text-align: center;
-      display: none;
+      display: none;           /* hidden by default — shown only after submit */
       border: none;
+      overflow-y: auto;
+      max-height: calc(100dvh - 40px);
+      z-index: 100;
       animation: popUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes popUpFade {
-      from { opacity: 0; transform: scale(0.96) translateY(10px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
+      from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+      to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
     .status-card.success {
