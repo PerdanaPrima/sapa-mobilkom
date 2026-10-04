@@ -652,9 +652,6 @@
   const token = urlParams.get('t') || urlParams.get('token') || urlParams.get('u') || urlParams.get('user');
   const forcedType = urlParams.get('type') || urlParams.get('scan');
 
-  // URL backend SAPA — diambil dari ?backend= (disisipkan saat generate link geotag)
-  // Fallback ke localhost:52717 jika tidak ada (default port SAPA lokal)
-  const SAPA_BACKEND_URL = (urlParams.get('backend') || 'http://127.0.0.1:52717').replace(/\/$/, '');
 
   let currentScanType = 'in';
   let isSubmitting = false;
@@ -1066,8 +1063,6 @@
             });
             if (resFallback.ok) {
               data = await resFallback.json();
-              // Fallback backend sudah otomatis memicu poller — tidak perlu notify lagi
-              successRpc = !!(data && data.success);
             }
           } catch (eFallback) {
             // ignore
@@ -1077,18 +1072,6 @@
         if (data && data.success) {
           stopCamera();
           showSuccess(data);
-
-          // Jika sukses via RPC (bukan fallback backend), trigger notifikasi WA secara eksplisit
-          // fire-and-forget — tidak menunggu respons, tidak memblokir UI
-          if (successRpc) {
-            try {
-              fetch(`${SAPA_BACKEND_URL}/api/geotag/notify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: token, triggered_by: 'rpc_success' })
-              }).catch(() => {}); // abaikan error CORS / backend offline
-            } catch(eNotify) { /* ignore */ }
-          }
         } else {
           isSubmitting = false;
           btn.disabled = false;
