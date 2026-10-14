@@ -593,27 +593,27 @@
         <span class="receipt-val" id="resName">-</span>
       </div>
       <div class="receipt-item">
-        <span class="receipt-label">Pangkalan</span>
+        <span class="receipt-label">Base Kantor</span>
         <span class="receipt-val" id="resBase">-</span>
       </div>
       <div class="receipt-item">
         <span class="receipt-label">Waktu</span>
         <span class="receipt-val" id="resTime">-</span>
       </div>
-      <div class="receipt-item">
+      <div class="receipt-item" id="resStatusRow">
         <span class="receipt-label">Status</span>
         <span class="receipt-val" id="resStatus" style="color: #16a34a;">Hadir</span>
       </div>
       <div class="receipt-item" id="resGeofenceRow">
-        <span class="receipt-label">Area</span>
-        <span class="receipt-val" id="resGeofence">Sesuai Radius</span>
+        <span class="receipt-label">Jarak ke Base</span>
+        <span class="receipt-val" id="resGeofence">Terverifikasi GPS</span>
       </div>
     </div>
 
     <!-- Info Konfirmasi Otomatis & Tombol Buka WhatsApp -->
     <div id="waActionBox" style="display: none; margin-top: 14px; text-align: center;">
       <p style="font-size: 11px; color: #64748b; margin: 0 0 10px 0; line-height: 1.45;">
-        Presensi telah tersimpan resmi di SAPA. Notifikasi konfirmasi otomatis sedang diproses ke WhatsApp kamu.
+        Presensi tersimpan resmi di SAPA. Bukti tanda terima otomatis dikirim ke WhatsApp kamu yaa.
       </p>
       <a id="waDirectLink" href="https://wa.me/6282283432739" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 40px; background: #16a34a; border: none; color: #ffffff; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 13px; border-radius: 9999px; text-decoration: none; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 12px -2px rgba(22, 163, 74, 0.25);">
         Buka WhatsApp
@@ -738,12 +738,154 @@
     }
   }
 
-  // 4. Reverse Geocode (100% Free: BigDataCloud Client + Nominatim Fallback)
+  // 4. Reverse Geocode (Street-Level Accuracy: Photon Komoot + Nominatim + Fallback)
+  let cachedGeotagAddress = null;
+  let cachedGeotagCoords = null;
+
+  async function prefetchGeotagAddress() {
+    if (navigator.geolocation && !cachedGeotagAddress) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          try {
+            const addr = await reverseGeocodeFast(lat, lng);
+            if (addr && addr !== "Lokasi Penugasan (Koordinat Terverifikasi)") {
+              cachedGeotagAddress = addr;
+              cachedGeotagCoords = [lat, lng];
+            }
+          } catch(e) {}
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    }
+  }
+
   async function reverseGeocodeFast(lat, lng) {
-    // 1. Prioritas Utama: BigDataCloud Client Reverse Geocode (Free, Cepat, Tanpa Rate Limit Ketat)
+    // 0. Cache Hit jika koordinat berdekatan (< 35 meter)
+    if (cachedGeotagAddress && cachedGeotagCoords) {
+      const dLat = Math.abs(lat - cachedGeotagCoords[0]);
+      const dLng = Math.abs(lng - cachedGeotagCoords[1]);
+      if (dLat < 0.00035 && dLng < 0.00035) {
+        return cachedGeotagAddress;
+      }
+    }
+
+    // 1. Prioritas Utama: Photon (Komoot OSM) - Sangat Cepat, Native CORS, Akurat Nama Jalan / Gang / POI di Indonesia
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const feat = (data.features && data.features.length > 0) ? data.features[0] : null;
+        if (feat && feat.properties) {
+          const p = feat.properties;
+          const parts = [];
+          const seen = new Set();
+          const addPart = (val) => {
+            if (val && typeof val === 'string') {
+              const clean = val.trim();
+              if (clean && !seen.has(clean.toLowerCase())) {
+                seen.add(clean.toLowerCase());
+                parts.push(clean);
+              }
+            }
+          };
+
+          // Ekstrak Nama Jalan / Gang / Komplek / Bangunan
+          const street = p.name || p.street;
+          if (street) addPart(street);
+
+          // Ekstrak Kelurahan / Desa / Distrik
+          const district = p.district || p.subdistrict || p.locality;
+          if (district) addPart(district);
+
+          // Ekstrak Kota / Kabupaten
+          const city = p.city || p.town || p.village;
+          if (city) addPart(city);
+          if (p.county) addPart(p.county);
+
+          // Ekstrak Provinsi
+          if (p.state) addPart(p.state);
+
+          if (parts.length > 0) {
+            const formatted = parts.join(', ');
+            cachedGeotagAddress = formatted;
+            cachedGeotagCoords = [lat, lng];
+            return formatted;
+          }
+        }
+      }
+    } catch (ePhoton) {
+      console.warn("Photon reverse geocode warning:", ePhoton);
+    }
+
+    // 2. Prioritas Kedua: OpenStreetMap Nominatim Direct
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`, {
+        signal: controller.signal,
+        headers: { 'Accept': 'application/json' }
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const addr = data.address || {};
+        const parts = [];
+        const seen = new Set();
+        const addPart = (val) => {
+          if (val && typeof val === 'string') {
+            const clean = val.trim();
+            if (clean && !seen.has(clean.toLowerCase())) {
+              seen.add(clean.toLowerCase());
+              parts.push(clean);
+            }
+          }
+        };
+
+        const road = addr.road || addr.pedestrian || addr.street || addr.residential || addr.highway || addr.building || addr.amenity || addr.industrial || addr.commercial;
+        if (road) {
+          addPart(road);
+        } else if (data.display_name) {
+          const dnParts = data.display_name.split(',').map(s => s.trim()).filter(Boolean);
+          if (dnParts.length > 0 && !/^\d+$/.test(dnParts[0])) {
+            addPart(dnParts[0]);
+          }
+        }
+
+        const village = addr.village || addr.suburb || addr.neighbourhood || addr.quarter || addr.hamlet;
+        if (village) addPart(village);
+
+        const subdistrict = addr.municipality || addr.subdistrict || addr.district || addr.city_district;
+        if (subdistrict) addPart(subdistrict);
+
+        const city = addr.county || addr.city || addr.regency || addr.town;
+        if (city) addPart(city);
+
+        const state = addr.state;
+        if (state) addPart(state);
+
+        if (parts.length > 0) {
+          const formatted = parts.join(', ');
+          cachedGeotagAddress = formatted;
+          cachedGeotagCoords = [lat, lng];
+          return formatted;
+        }
+      }
+    } catch (eNom) {
+      console.warn("Nominatim reverse geocode warning:", eNom);
+    }
+
+    // 3. Fallback Cadangan: BigDataCloud Client Reverse Geocode
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`, {
         signal: controller.signal
       });
@@ -762,6 +904,18 @@
           }
         };
 
+        if (data.localityInfo && Array.isArray(data.localityInfo.informative)) {
+          for (const item of data.localityInfo.informative) {
+            if (item && item.name) {
+              const n = item.name.toLowerCase();
+              if (n.startsWith('jl') || n.startsWith('jalan') || n.startsWith('gang') || (item.description && (item.description.includes('road') || item.description.includes('street')))) {
+                addPart(item.name);
+                break;
+              }
+            }
+          }
+        }
+
         if (data.localityInfo && data.localityInfo.administrative) {
           const admins = data.localityInfo.administrative;
           for (let i = admins.length - 1; i >= 0; i--) {
@@ -775,42 +929,13 @@
         addPart(data.principalSubdivision);
 
         if (parts.length > 0) {
-          return parts.join(', ');
+          const formatted = parts.join(', ');
+          cachedGeotagAddress = formatted;
+          cachedGeotagCoords = [lat, lng];
+          return formatted;
         }
       }
-    } catch (e) {
-      // Fallback ke Nominatim jika BigDataCloud offline
-    }
-
-    // 2. Fallback: OpenStreetMap Nominatim
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`, {
-        signal: controller.signal,
-        headers: { 'Accept': 'application/json' }
-      });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const data = await res.json();
-        const addr = data.address || {};
-        const parts = [];
-        const road = addr.road || addr.pedestrian || addr.street || addr.industrial || addr.commercial || addr.highway || addr.building;
-        if (road) parts.push(road);
-        const village = addr.village || addr.suburb || addr.neighbourhood || addr.quarter || addr.hamlet;
-        if (village && !parts.includes(village)) parts.push(village);
-        const subdistrict = addr.municipality || addr.subdistrict || addr.district || addr.city_district;
-        if (subdistrict && !parts.includes(subdistrict)) parts.push(subdistrict);
-        const city = addr.county || addr.city || addr.regency || addr.town;
-        if (city && !parts.includes(city)) parts.push(city);
-
-        if (parts.length > 0) {
-          return parts.join(', ');
-        }
-      }
-    } catch (e) {
-      // Abort / Network error
-    }
+    } catch (eBdc) {}
 
     return "Lokasi Penugasan (Koordinat Terverifikasi)";
   }
@@ -847,14 +972,23 @@
       ctx.fillStyle = gradient;
       ctx.fillRect(0, canvas.height - bannerH, canvas.width, bannerH);
 
-      // Teks Watermark 4 Baris
+      // Teks Watermark 4 Baris (WIB Timezone via Intl.DateTimeFormat)
       const now = new Date();
-      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const wibDate = new Date(utc + (3600000 * 7));
-      const pad = (n) => String(n).padStart(2, '0');
-      const monthsIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-      const dateStr = `${pad(wibDate.getDate())} ${monthsIndo[wibDate.getMonth()]} ${wibDate.getFullYear()}`;
-      const timeStr = `${pad(wibDate.getHours())}:${pad(wibDate.getMinutes())}:${pad(wibDate.getSeconds())} WIB`;
+      const dateFmt = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+      const timeFmt = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      const dateStr = dateFmt.format(now);
+      const timeStr = `${timeFmt.format(now).replace(/\./g, ':')} WIB`;
 
       const accStr = acc ? Math.round(acc) : 10;
       const latFixed = Number(lat).toFixed(6);
@@ -875,17 +1009,17 @@
       ctx.font = '11.5px sans-serif';
       ctx.fillText(`📍 ${latFixed}, ${lngFixed} (Akurasi: ±${accStr}m)`, 16, canvas.height - 28);
 
-      // Baris 4: Alamat Lengkap
+      // Baris 4: Alamat Lengkap (Tanpa emoji)
       ctx.fillStyle = '#fde047';
       ctx.font = '11.5px sans-serif';
       let displayAddress = address;
-      if (ctx.measureText(`🏠 ${displayAddress}`).width > canvas.width - 32) {
-        while (displayAddress.length > 10 && ctx.measureText(`🏠 ${displayAddress}...`).width > canvas.width - 32) {
+      if (ctx.measureText(displayAddress).width > canvas.width - 32) {
+        while (displayAddress.length > 10 && ctx.measureText(`${displayAddress}...`).width > canvas.width - 32) {
           displayAddress = displayAddress.substring(0, displayAddress.length - 2);
         }
         displayAddress += '...';
       }
-      ctx.fillText(`🏠 ${displayAddress}`, 16, canvas.height - 10);
+      ctx.fillText(displayAddress, 16, canvas.height - 10);
 
       return new Promise((res) => {
         canvas.toBlob((blob) => {
@@ -898,9 +1032,10 @@
     }
   }
 
-  // Inisialisasi kamera satu kali saat DOM siap
+  // Inisialisasi kamera satu kali saat DOM siap dan pre-fetch lokasi & alamat
   window.addEventListener('DOMContentLoaded', () => {
     initCamera();
+    prefetchGeotagAddress();
   });
 
   // Validasi awal token
@@ -1129,22 +1264,68 @@
     document.getElementById('resBase').textContent = data.base_name || '-';
     document.getElementById('resTime').textContent = data.time_wib || '-';
 
-    let statusText = data.entry_status || 'Hadir';
-    document.getElementById('resStatus').textContent = statusText;
+    // Status: Sembunyikan jika hari libur / akhir pekan atau entry_status kosong
+    const statusRow = document.getElementById('resStatusRow');
+    const todayDay = new Date().getDay();
+    const isWeekend = (todayDay === 0 || todayDay === 6);
+
+    // Evaluasi status dinamis berdasarkan aturan jam kerja (default 07:00:00 WIB untuk Masuk)
+    const nowWib = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 7));
+    const scanSec = (nowWib.getHours() * 3600) + (nowWib.getMinutes() * 60) + nowWib.getSeconds();
+
+    let statusText = data.entry_status;
+    if (!isWeekend && !data.is_non_workday) {
+      if (currentScanType === 'in') {
+        const ruleInStr = urlParams.get('rule_in') || urlParams.get('in') || '07:00:00';
+        const inParts = ruleInStr.split(':').map(Number);
+        const inLimitSec = (inParts[0] * 3600) + ((inParts[1] || 0) * 60) + (parseInt(urlParams.get('tol') || '0', 10) * 60);
+        statusText = (scanSec > inLimitSec) ? 'Terlambat' : 'Tepat Waktu';
+      } else if (currentScanType === 'out') {
+        const isFriday = (nowWib.getDay() === 5);
+        const defOutStr = isFriday ? '16:30:00' : '16:00:00';
+        const ruleOutStr = urlParams.get('out') || defOutStr;
+        const outParts = ruleOutStr.split(':').map(Number);
+        const outLimitSec = (outParts[0] * 3600) + ((outParts[1] || 0) * 60);
+        statusText = (scanSec < outLimitSec) ? 'Pulang Cepat' : 'Pulang';
+      }
+    }
+
+    if (!statusText || statusText === '-' || data.is_non_workday || isWeekend) {
+      if (statusRow) statusRow.style.display = 'none';
+    } else {
+      if (statusRow) {
+        statusRow.style.display = 'flex';
+        const resStatEl = document.getElementById('resStatus');
+        if (resStatEl) {
+          resStatEl.textContent = statusText;
+          resStatEl.style.color = (statusText === 'Terlambat' || statusText === 'Pulang Cepat') ? '#dc2626' : '#16a34a';
+        }
+      }
+    }
 
     const geoRow = document.getElementById('resGeofenceRow');
+    const geoEl = document.getElementById('resGeofence');
     if (data.is_in_geofence !== undefined) {
+      const dMeters = Math.round(data.distance_m || 0);
+      const bName = data.base_name || 'Base';
       if (data.is_in_geofence) {
-        document.getElementById('resGeofence').textContent = 'Sesuai Area (' + (data.distance_m || 0) + 'm)';
+        if (geoEl) geoEl.textContent = 'Di Area Base (' + dMeters + 'm)';
       } else {
-        document.getElementById('resGeofence').textContent = 'Luar Radius (' + (data.distance_m || 0) + 'm)';
+        const dText = dMeters >= 1000 ? '~' + (dMeters / 1000).toFixed(1) + ' km' : dMeters + 'm';
+        if (geoEl) geoEl.textContent = dText + ' dari ' + bName;
       }
     } else {
-      document.getElementById('resGeofence').textContent = 'Terverifikasi GPS';
+      if (geoEl) geoEl.textContent = 'Terverifikasi GPS';
     }
 
     // Nomor WhatsApp Bot SAPA Resmi
     let botPhone = OFFICIAL_BOT_PHONE;
+    const urlParamsObj = new URLSearchParams(window.location.search);
+    const paramBot = urlParamsObj.get('bot') || urlParamsObj.get('phone');
+    if (paramBot) {
+      const cleanParamBot = String(paramBot).replace(/[^\d]/g, '');
+      if (cleanParamBot) botPhone = cleanParamBot;
+    }
     if (data && (data.whatsapp_bot_phone || data.bot_phone)) {
       const serverBot = String(data.whatsapp_bot_phone || data.bot_phone).replace(/[^\d]/g, '');
       if (serverBot) botPhone = serverBot;
