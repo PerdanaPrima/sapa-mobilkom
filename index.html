@@ -808,12 +808,13 @@
           // Ekstrak Kota / Kabupaten
           const city = p.city || p.town || p.village;
           if (city) addPart(city);
-          if (p.county) addPart(p.county);
+          if (p.county && !city) addPart(p.county);
 
-          // Ekstrak Provinsi
-          if (p.state) addPart(p.state);
+          // Ekstrak Provinsi (hanya jika parts masih sedikit)
+          if (p.state && parts.length < 2) addPart(p.state);
 
-          if (parts.length > 0) {
+          // Jika Photon menemukan nama jalan/bangunan spesifik, gunakan langsung
+          if (street && parts.length > 0) {
             const formatted = parts.join(', ');
             cachedGeotagAddress = formatted;
             cachedGeotagCoords = [lat, lng];
@@ -825,7 +826,7 @@
       console.warn("Photon reverse geocode warning:", ePhoton);
     }
 
-    // 2. Prioritas Kedua: OpenStreetMap Nominatim Direct
+    // 2. Prioritas Kedua: OpenStreetMap Nominatim Direct (Sangat akurat untuk nama jalan di Indonesia)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -867,9 +868,6 @@
 
         const city = addr.county || addr.city || addr.regency || addr.town;
         if (city) addPart(city);
-
-        const state = addr.state;
-        if (state) addPart(state);
 
         if (parts.length > 0) {
           const formatted = parts.join(', ');
