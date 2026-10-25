@@ -1276,7 +1276,7 @@
 
     const geoRow = document.getElementById('resGeofenceRow');
     const geoEl = document.getElementById('resGeofence');
-    const isMandahParam = (urlParams.get('mandah') === '1' || Boolean(urlParams.get('site')));
+    const isMandahParam = (urlParams.get('mandah') === '1' || urlParams.get('dinas') === '1' || Boolean(urlParams.get('site')) || urlParams.get('purpose') === 'mandah' || urlParams.get('purpose') === 'dinas');
     if (data.is_mandah || isMandahParam) {
       if (geoEl) geoEl.textContent = 'Penugasan Lapangan / Mandah (Lokasi Valid)';
     } else if (data.is_in_geofence !== undefined) {
