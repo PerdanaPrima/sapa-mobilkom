@@ -650,10 +650,9 @@
   // 1. Parameter URL & Identitas Token
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('t') || urlParams.get('token') || urlParams.get('u') || urlParams.get('user');
-  const forcedType = urlParams.get('type') || urlParams.get('scan');
+  const forcedType = (urlParams.get('type') || urlParams.get('scan') || urlParams.get('scan_type') || '').toLowerCase();
 
-
-  let currentScanType = 'in';
+  let currentScanType = (forcedType === 'in' || forcedType === 'out') ? forcedType : 'in';
   let isSubmitting = false;
   let mediaStream = null;
   let cameraInitializing = false;
@@ -670,14 +669,15 @@
     const clockEl = document.getElementById('liveClock');
     if (clockEl) clockEl.textContent = `${h}:${m}:${s} WIB`;
 
-    if (forcedType === 'out' || (!forcedType && hours >= 12)) {
-      currentScanType = 'out';
-      const tEl = document.getElementById('pageTitle');
-      if (tEl) tEl.textContent = 'Presensi Pulang';
+    if (forcedType === 'in' || forcedType === 'out') {
+      currentScanType = forcedType;
     } else {
-      currentScanType = 'in';
-      const tEl = document.getElementById('pageTitle');
-      if (tEl) tEl.textContent = 'Presensi Masuk';
+      currentScanType = (hours >= 12) ? 'out' : 'in';
+    }
+
+    const tEl = document.getElementById('pageTitle');
+    if (tEl) {
+      tEl.textContent = (currentScanType === 'out') ? 'Presensi Pulang' : 'Presensi Masuk';
     }
   }
   setInterval(updateClock, 1000);
@@ -772,19 +772,66 @@
       }
     }
 
-    // 1. Prioritas Utama: Photon (Komoot OSM) - Sangat Cepat, Native CORS, Akurat Nama Jalan / Gang / POI di Indonesia
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
-      const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}`, {
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const data = await res.json();
-        const feat = (data.features && data.features.length > 0) ? data.features[0] : null;
-        if (feat && feat.properties) {
-          const p = feat.properties;
+    const fallbackCoord = `Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+    const doGeocode = async () => {
+      // 1. Prioritas Utama: Photon (Komoot OSM)
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`https://photon.komoot.io/reverse?lat=${lat}&lon=${lng}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          const feat = (data.features && data.features.length > 0) ? data.features[0] : null;
+          if (feat && feat.properties) {
+            const p = feat.properties;
+            const parts = [];
+            const seen = new Set();
+            const addPart = (val) => {
+              if (val && typeof val === 'string') {
+                const clean = val.trim();
+                if (clean && !seen.has(clean.toLowerCase())) {
+                  seen.add(clean.toLowerCase());
+                  parts.push(clean);
+                }
+              }
+            };
+
+            const street = p.name || p.street;
+            if (street) addPart(street);
+
+            const district = p.district || p.subdistrict || p.locality;
+            if (district) addPart(district);
+
+            const city = p.city || p.town || p.village;
+            if (city) addPart(city);
+            if (p.county && !city) addPart(p.county);
+
+            if (p.state && parts.length < 2) addPart(p.state);
+
+            if (street && parts.length > 0) {
+              const formatted = parts.join(', ');
+              cachedGeotagAddress = formatted;
+              cachedGeotagCoords = [lat, lng];
+              return formatted;
+            }
+          }
+        }
+      } catch (ePhoton) {}
+
+      // 2. Prioritas Kedua: BigDataCloud (Cepat & Ringan)
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1800);
+        const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
           const parts = [];
           const seen = new Set();
           const addPart = (val) => {
@@ -797,145 +844,84 @@
             }
           };
 
-          // Ekstrak Nama Jalan / Gang / Komplek / Bangunan
-          const street = p.name || p.street;
-          if (street) addPart(street);
+          if (data.localityInfo && Array.isArray(data.localityInfo.informative)) {
+            for (const item of data.localityInfo.informative) {
+              if (item && item.name) {
+                const n = item.name.toLowerCase();
+                if (n.startsWith('jl') || n.startsWith('jalan') || n.startsWith('gang') || (item.description && (item.description.includes('road') || item.description.includes('street')))) {
+                  addPart(item.name);
+                  break;
+                }
+              }
+            }
+          }
 
-          // Ekstrak Kelurahan / Desa / Distrik
-          const district = p.district || p.subdistrict || p.locality;
-          if (district) addPart(district);
+          if (data.localityInfo && data.localityInfo.administrative) {
+            const admins = data.localityInfo.administrative;
+            for (let i = admins.length - 1; i >= 0; i--) {
+              if (admins[i].adminLevel >= 5) {
+                addPart(admins[i].name);
+              }
+            }
+          }
+          addPart(data.locality);
+          addPart(data.city);
 
-          // Ekstrak Kota / Kabupaten
-          const city = p.city || p.town || p.village;
-          if (city) addPart(city);
-          if (p.county && !city) addPart(p.county);
-
-          // Ekstrak Provinsi (hanya jika parts masih sedikit)
-          if (p.state && parts.length < 2) addPart(p.state);
-
-          // Jika Photon menemukan nama jalan/bangunan spesifik, gunakan langsung
-          if (street && parts.length > 0) {
+          if (parts.length > 0) {
             const formatted = parts.join(', ');
             cachedGeotagAddress = formatted;
             cachedGeotagCoords = [lat, lng];
             return formatted;
           }
         }
-      }
-    } catch (ePhoton) {
-      console.warn("Photon reverse geocode warning:", ePhoton);
-    }
+      } catch (eBdc) {}
 
-    // 2. Prioritas Kedua: OpenStreetMap Nominatim Direct (Sangat akurat untuk nama jalan di Indonesia)
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`, {
-        signal: controller.signal,
-        headers: { 'Accept': 'application/json' }
-      });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const data = await res.json();
-        const addr = data.address || {};
-        const parts = [];
-        const seen = new Set();
-        const addPart = (val) => {
-          if (val && typeof val === 'string') {
-            const clean = val.trim();
-            if (clean && !seen.has(clean.toLowerCase())) {
-              seen.add(clean.toLowerCase());
-              parts.push(clean);
-            }
-          }
-        };
-
-        const road = addr.road || addr.pedestrian || addr.street || addr.residential || addr.highway || addr.building || addr.amenity || addr.industrial || addr.commercial;
-        if (road) {
-          addPart(road);
-        } else if (data.display_name) {
-          const dnParts = data.display_name.split(',').map(s => s.trim()).filter(Boolean);
-          if (dnParts.length > 0 && !/^\d+$/.test(dnParts[0])) {
-            addPart(dnParts[0]);
-          }
-        }
-
-        const village = addr.village || addr.suburb || addr.neighbourhood || addr.quarter || addr.hamlet;
-        if (village) addPart(village);
-
-        const subdistrict = addr.municipality || addr.subdistrict || addr.district || addr.city_district;
-        if (subdistrict) addPart(subdistrict);
-
-        const city = addr.county || addr.city || addr.regency || addr.town;
-        if (city) addPart(city);
-
-        if (parts.length > 0) {
-          const formatted = parts.join(', ');
-          cachedGeotagAddress = formatted;
-          cachedGeotagCoords = [lat, lng];
-          return formatted;
-        }
-      }
-    } catch (eNom) {
-      console.warn("Nominatim reverse geocode warning:", eNom);
-    }
-
-    // 3. Fallback Cadangan: BigDataCloud Client Reverse Geocode
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=id`, {
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (res.ok) {
-        const data = await res.json();
-        const parts = [];
-        const seen = new Set();
-        const addPart = (val) => {
-          if (val && typeof val === 'string') {
-            const clean = val.trim();
-            if (clean && !seen.has(clean.toLowerCase())) {
-              seen.add(clean.toLowerCase());
-              parts.push(clean);
-            }
-          }
-        };
-
-        if (data.localityInfo && Array.isArray(data.localityInfo.informative)) {
-          for (const item of data.localityInfo.informative) {
-            if (item && item.name) {
-              const n = item.name.toLowerCase();
-              if (n.startsWith('jl') || n.startsWith('jalan') || n.startsWith('gang') || (item.description && (item.description.includes('road') || item.description.includes('street')))) {
-                addPart(item.name);
-                break;
+      // 3. Fallback Ketiga: OpenStreetMap Nominatim Direct
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1500);
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=id`, {
+          signal: controller.signal,
+          headers: { 'Accept': 'application/json' }
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const data = await res.json();
+          const addr = data.address || {};
+          const parts = [];
+          const seen = new Set();
+          const addPart = (val) => {
+            if (val && typeof val === 'string') {
+              const clean = val.trim();
+              if (clean && !seen.has(clean.toLowerCase())) {
+                seen.add(clean.toLowerCase());
+                parts.push(clean);
               }
             }
+          };
+
+          const road = addr.road || addr.pedestrian || addr.street || addr.residential || addr.highway || addr.building;
+          if (road) addPart(road);
+          const village = addr.village || addr.suburb || addr.neighbourhood;
+          if (village) addPart(village);
+          const city = addr.county || addr.city || addr.regency || addr.town;
+          if (city) addPart(city);
+
+          if (parts.length > 0) {
+            const formatted = parts.join(', ');
+            cachedGeotagAddress = formatted;
+            cachedGeotagCoords = [lat, lng];
+            return formatted;
           }
         }
+      } catch (eNom) {}
 
-        if (data.localityInfo && data.localityInfo.administrative) {
-          const admins = data.localityInfo.administrative;
-          for (let i = admins.length - 1; i >= 0; i--) {
-            if (admins[i].adminLevel >= 5) {
-              addPart(admins[i].name);
-            }
-          }
-        }
-        addPart(data.locality);
-        addPart(data.city);
-        addPart(data.principalSubdivision);
+      return fallbackCoord;
+    };
 
-        if (parts.length > 0) {
-          const formatted = parts.join(', ');
-          cachedGeotagAddress = formatted;
-          cachedGeotagCoords = [lat, lng];
-          return formatted;
-        }
-      }
-    } catch (eBdc) {}
-
-    return "Lokasi Penugasan (Koordinat Terverifikasi)";
+    const overallTimeout = new Promise(resolve => setTimeout(() => resolve(fallbackCoord), 2500));
+    return Promise.race([doGeocode(), overallTimeout]);
+  }
   }
 
   // 5. Pengambilan Frame Foto Selfie & Watermark
@@ -1155,13 +1141,12 @@
               successRpc = true;
             }
           } else {
-            // Coba payload 5-arg jika schema RPC belum diperbarui
+            // Coba payload 4-arg minimal jika RPC schema versi lama
             const fallbackRpcPayload = {
               p_token: token,
               p_latitude: lat,
               p_longitude: lng,
-              p_accuracy: acc,
-              p_photo_url: photoUrl
+              p_accuracy: acc
             };
             const resFallbackRpc = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
               method: 'POST',
@@ -1178,7 +1163,7 @@
                 successRpc = true;
               }
             } else {
-              const errJson = await resFallbackRpc.json().catch(() => ({}));
+              const errJson = await res.json().catch(() => ({}));
               data = errJson;
             }
           }
@@ -1186,8 +1171,8 @@
           console.warn("RPC fetch exception:", eRpc);
         }
 
-        // 3. Fallback ke endpoint server backend SAPA jika RPC gagal
-        if (!successRpc) {
+        // 3. Fallback ke endpoint server backend SAPA jika RPC gagal dan bukan di GitHub Pages
+        if (!successRpc && !window.location.hostname.includes('github.io')) {
           try {
             const resFallback = await fetch('/api/geotag/submit', {
               method: 'POST',
@@ -1271,14 +1256,17 @@
     const nowWib = new Date(new Date().getTime() + (new Date().getTimezoneOffset() * 60000) + (3600000 * 7));
     const scanSec = (nowWib.getHours() * 3600) + (nowWib.getMinutes() * 60) + nowWib.getSeconds();
 
+    // Gunakan scan_type aktual dari response server
+    const actualScanType = data.scan_type || currentScanType;
+
     let statusText = data.entry_status;
     if (!isWeekend && !data.is_non_workday) {
-      if (currentScanType === 'in') {
+      if (actualScanType === 'in') {
         const ruleInStr = urlParams.get('rule_in') || urlParams.get('in') || '07:00:00';
         const inParts = ruleInStr.split(':').map(Number);
         const inLimitSec = (inParts[0] * 3600) + ((inParts[1] || 0) * 60) + (parseInt(urlParams.get('tol') || '0', 10) * 60);
         statusText = (scanSec > inLimitSec) ? 'Terlambat' : 'Tepat Waktu';
-      } else if (currentScanType === 'out') {
+      } else if (actualScanType === 'out') {
         const isFriday = (nowWib.getDay() === 5);
         const defOutStr = isFriday ? '16:30:00' : '16:00:00';
         const ruleOutStr = urlParams.get('out') || defOutStr;
@@ -1303,7 +1291,9 @@
 
     const geoRow = document.getElementById('resGeofenceRow');
     const geoEl = document.getElementById('resGeofence');
-    if (data.is_in_geofence !== undefined) {
+    if (data.is_mandah) {
+      if (geoEl) geoEl.textContent = 'Penugasan Luar / Mandah';
+    } else if (data.is_in_geofence !== undefined) {
       const dMeters = Math.round(data.distance_m || 0);
       const bName = data.base_name || 'Base';
       if (data.is_in_geofence) {
