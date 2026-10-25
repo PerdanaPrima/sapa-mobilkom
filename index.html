@@ -1141,12 +1141,13 @@
               successRpc = true;
             }
           } else {
-            // Coba payload 4-arg minimal jika RPC schema versi lama
+            // Coba payload fallback jika RPC schema versi lama di database
             const fallbackRpcPayload = {
               p_token: token,
               p_latitude: lat,
               p_longitude: lng,
-              p_accuracy: acc
+              p_accuracy: acc,
+              p_photo_url: photoUrl
             };
             const resFallbackRpc = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
               method: 'POST',
@@ -1163,28 +1164,12 @@
                 successRpc = true;
               }
             } else {
-              const errJson = await res.json().catch(() => ({}));
+              const errJson = await resFallbackRpc.json().catch(() => ({}));
               data = errJson;
             }
           }
         } catch (eRpc) {
           console.warn("RPC fetch exception:", eRpc);
-        }
-
-        // 3. Fallback ke endpoint server backend SAPA jika RPC gagal dan bukan di GitHub Pages
-        if (!successRpc && !window.location.hostname.includes('github.io')) {
-          try {
-            const resFallback = await fetch('/api/geotag/submit', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(fullPayload)
-            });
-            if (resFallback.ok) {
-              data = await resFallback.json();
-            }
-          } catch (eFallback) {
-            // ignore
-          }
         }
 
         if (data && data.success) {
@@ -1291,8 +1276,9 @@
 
     const geoRow = document.getElementById('resGeofenceRow');
     const geoEl = document.getElementById('resGeofence');
-    if (data.is_mandah) {
-      if (geoEl) geoEl.textContent = 'Penugasan Luar / Mandah';
+    const isMandahParam = (urlParams.get('mandah') === '1' || Boolean(urlParams.get('site')));
+    if (data.is_mandah || isMandahParam) {
+      if (geoEl) geoEl.textContent = 'Penugasan Lapangan / Mandah (Lokasi Valid)';
     } else if (data.is_in_geofence !== undefined) {
       const dMeters = Math.round(data.distance_m || 0);
       const bName = data.base_name || 'Base';
