@@ -922,7 +922,6 @@
     const overallTimeout = new Promise(resolve => setTimeout(() => resolve(fallbackCoord), 2500));
     return Promise.race([doGeocode(), overallTimeout]);
   }
-  }
 
   // 5. Pengambilan Frame Foto Selfie & Watermark
   async function captureLivePhotoBlob(lat, lng, acc = 10) {
