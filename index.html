@@ -1123,7 +1123,7 @@
           p_photo_url: photoUrl
         };
 
-        // 2. Panggil Supabase RPC Utama
+        // 2. Panggil Supabase RPC Utama (8-arg kanonik dengan pencegahan PGRST203)
         try {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
             method: 'POST',
@@ -1134,41 +1134,21 @@
             },
             body: JSON.stringify(fullPayload)
           });
+          const resJson = await res.json().catch(() => ({}));
           if (res.ok) {
-            data = await res.json();
+            data = resJson;
             if (data && data.success !== undefined) {
               successRpc = true;
             }
           } else {
-            // Coba payload fallback jika RPC schema versi lama di database
-            const fallbackRpcPayload = {
-              p_token: token,
-              p_latitude: lat,
-              p_longitude: lng,
-              p_accuracy: acc,
-              p_photo_url: photoUrl
-            };
-            const resFallbackRpc = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_geolocation_attendance`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-              },
-              body: JSON.stringify(fallbackRpcPayload)
-            });
-            if (resFallbackRpc.ok) {
-              data = await resFallbackRpc.json();
-              if (data && data.success !== undefined) {
-                successRpc = true;
-              }
-            } else {
-              const errJson = await resFallbackRpc.json().catch(() => ({}));
-              data = errJson;
+            data = resJson;
+            if (resJson && resJson.message && resJson.message.includes('candidate function')) {
+              data.message = 'Konfigurasi fungsi database sedang diperbarui. Jalankan migrasi DROP FUNCTION pada Supabase.';
             }
           }
         } catch (eRpc) {
           console.warn("RPC fetch exception:", eRpc);
+          data = { success: false, message: 'Gagal terhubung ke server database presensi.' };
         }
 
         if (data && data.success) {
