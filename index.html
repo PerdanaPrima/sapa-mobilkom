@@ -660,7 +660,8 @@
     if (forcedType === 'in' || forcedType === 'out') {
       currentScanType = forcedType;
     } else {
-      currentScanType = (hours >= 12) ? 'out' : 'in';
+      const splitHour = parseInt(urlParams.get('split') || '12', 10);
+      currentScanType = (hours >= splitHour) ? 'out' : 'in';
     }
 
     const tEl = document.getElementById('pageTitle');
